@@ -64,7 +64,6 @@ namespace Victory.Network
                         options.SwaggerRoutes.Add(new SwaggerUi3Route($"v{description.GroupName}", $"/swagger/v{description.GroupName}/swagger.json"));
                     }
                 });
-                //app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "Victory.Network v1"));
             };
 
             app.UseMiddleware<LanguageMiddleware>();

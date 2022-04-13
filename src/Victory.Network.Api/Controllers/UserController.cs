@@ -33,22 +33,6 @@ namespace Victory.Network.Api.Controllers
             return Mapper.Map<RegisterUserResponse>(output);
         }
 
-        [HttpPost]
-        [Route("deposit")]
-        [Authorize]
-        public async Task Deposit()
-        {
-
-        }
-
-        [HttpPost]
-        [Route("verifyDeposit")]
-        [Authorize]
-        public async Task VerifyDeposit()
-        {
-
-        }
-
         [HttpGet]
         [Authorize]
         public async Task GetUser()

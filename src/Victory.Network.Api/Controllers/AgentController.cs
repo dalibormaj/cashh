@@ -1,6 +1,8 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System;
 using System.Threading.Tasks;
+using Victory.Network.Api.Dtos.Requests;
 
 namespace Victory.Network.Api.Controllers
 {
@@ -19,16 +21,15 @@ namespace Victory.Network.Api.Controllers
 
         }
 
-        [HttpGet("agentTransactions")]
+        [HttpGet("transactions")]
         [Authorize]
-        public async Task GetAgentTransactions()
+        public async Task GetAgentTransactions([FromBody] GetAgentTransactionsRequest request)
         {
-
         }
 
         [HttpGet("commissions")]
         [Authorize]
-        public async Task GetCommissions()
+        public async Task GetCommissions([FromBody] GetCommisionsRequest request)
         {
 
         }
