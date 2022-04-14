@@ -1,6 +1,8 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System;
 using System.Threading.Tasks;
+using Victory.Auth;
 using Victory.Network.Api.Dtos.Requests;
 using Victory.Network.Api.Dtos.Responses;
 using Victory.Network.Application.Services.UserService;
@@ -24,7 +26,9 @@ namespace Victory.Network.Api.Controllers
         public async Task<RegisterUserResponse> RegisterUser([FromBody] RegisterUserRequest request)
         {
             GlobalValidator.Validate(request);
-            var output = await _userService.RegisterUserAsync(request.CitizenId, 
+            var agentId = HttpContext.User.GetId() ?? throw new ArgumentException();
+            var output = await _userService.RegisterUserAsync(agentId,
+                                                              request.CitizenId, 
                                                               request.EmailVerificationUrl, 
                                                               request.Email, 
                                                               request.MobilePhoneNumber, 
@@ -35,9 +39,9 @@ namespace Victory.Network.Api.Controllers
 
         [HttpGet]
         [Authorize]
-        public async Task GetUser()
+        public async Task<UserResponse> GetUser(string identifier)
         {
-
+            return new UserResponse();
         }
     }
 }

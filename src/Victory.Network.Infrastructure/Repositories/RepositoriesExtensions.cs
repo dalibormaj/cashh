@@ -5,11 +5,12 @@ using StackExchange.Redis;
 using System.Collections.Generic;
 using Victory.DataAccess;
 using Victory.Network.Infrastructure.Extensions;
-using Victory.Network.Infrastructure.UnitOfWork.Settings;
+using Victory.Network.Infrastructure.Repositories.Abstraction;
+using Victory.Network.Infrastructure.Repositories.Settings;
 
-namespace Victory.Network.Infrastructure.UnitOfWork
+namespace Victory.Network.Infrastructure.Repositories
 {
-    public static class DataAccessExtensions
+    public static class RepositoriesExtensions
     {
         public static DatabaseSettings GetDatabaseSettings(this IConfiguration configuration)
         {
@@ -19,7 +20,7 @@ namespace Victory.Network.Infrastructure.UnitOfWork
             return settings;
         }
 
-        public static void AddDataAccess(this IServiceCollection services, IConfiguration configuration)
+        public static void AddRepositories(this IServiceCollection services, IConfiguration configuration)
         {
             var dbSettings = configuration.GetDatabaseSettings();
 
@@ -32,7 +33,9 @@ namespace Victory.Network.Infrastructure.UnitOfWork
             redisOptions.CommandMap = CommandMap.Create(new HashSet<string> { "SUBSCRIBE" }, false);//disables creating additional (pub/sub) connection
 
             services.AddSingleton<ICacheContext>(x => new CacheContext(redisOptions));
-            services.AddTransient<ITestUnitOfWork>(x => ActivatorUtilities.CreateInstance<TestUnitOfWork>(x, new object[] { new DataContext<NpgsqlConnection>(dbSettings.ConnectionStrings.Postgre.Test) }));
+            services.AddTransient<IDataContext>(x => new DataContext<NpgsqlConnection>(dbSettings.ConnectionStrings.Postgre.Test));
+            services.AddTransient<IUnitOfWork, DefaultUnitOfWork>();
+
         }
     }
 }

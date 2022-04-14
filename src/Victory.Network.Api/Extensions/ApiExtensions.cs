@@ -55,56 +55,6 @@ namespace Victory.Network.Api.Extensions
                     });
                 });
             }
-
-            //services.AddSwaggerGen(c =>
-            //{
-            //    c.SwaggerDoc("v1", new OpenApiInfo { Title = "Victory.Network", Version = "v1" });
-            //    c.AddSecurityDefinition(AuthSchema.BEARER, new OpenApiSecurityScheme
-            //    {
-            //        Description = @"Authorization header using the Bearer scheme. Enter your token in the text input below.
-            //                        Example: 'kJ8aCbzuMRezSblLVmQlMSZB1ajPS5PtT23hS8QIuqBpYphHx4izc'",
-            //        Name = "Authorization",
-            //        In = ParameterLocation.Header,
-            //        Type = SecuritySchemeType.Http,
-            //        Scheme = AuthSchema.BEARER
-            //    });
-
-            //    c.AddSecurityDefinition(AuthSchema.AZURE_AD, new OpenApiSecurityScheme
-            //    {
-            //        Description = @"Authorization header using the Bearer scheme. Enter your token in the text input below.
-            //                        Example: 'kJ8aCbzuMRezSblLVmQlMSZB1ajPS5PtT23hS8QIuqBpYphHx4izc'",
-            //        Name = "Authorization",
-            //        In = ParameterLocation.Header,
-            //        Type = SecuritySchemeType.ApiKey,
-            //        Scheme = AuthSchema.AZURE_AD
-            //    });
-
-            //    c.AddSecurityRequirement(new OpenApiSecurityRequirement
-            //    {
-            //        {
-            //            new OpenApiSecurityScheme
-            //            {
-            //                Reference = new OpenApiReference
-            //                {
-            //                    Type = ReferenceType.SecurityScheme,
-            //                    Id = AuthSchema.BEARER
-            //                }
-            //            },
-            //            Array.Empty<string>()
-            //        },
-            //        {
-            //            new OpenApiSecurityScheme
-            //            {
-            //                Reference = new OpenApiReference
-            //                {
-            //                    Type = ReferenceType.SecurityScheme,
-            //                    Id = AuthSchema.AZURE_AD
-            //                }
-            //            },
-            //            Array.Empty<string>()
-            //        }
-            //    });
-            //});
         }
 
         public static void AddMappers(this IServiceCollection services)

@@ -19,10 +19,12 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Victory.DataAccess\Victory.DataAccess.csproj" />
+    <ProjectReference Include="..\Victory.Network.Domain\Victory.Network.Domain.csproj" />
   </ItemGroup>
 
   <ItemGroup>
     <Folder Include="HttpClients\InternalApi\" />
+    <Folder Include="Repositories\Models\" />
   </ItemGroup>
 
 </Project>

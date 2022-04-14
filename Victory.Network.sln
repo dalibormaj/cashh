@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.31727.386
+# Visual Studio Version 17
+VisualStudioVersion = 17.1.32407.343
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Victory.Network.Api", "src\Victory.Network.Api\Victory.Network.Api.csproj", "{9D556B35-433D-4B6F-A2CF-B1D8F5AD0B07}"
 EndProject
@@ -22,6 +22,8 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Infrastructure", "Infrastructure", "{52020FEA-CB66-4ABC-B777-EE59D8494A2E}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Victory.Auth", "src\Victory.Auth\Victory.Auth.csproj", "{55774561-63EF-4602-8B23-250692D0EDDC}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Victory.Network.Domain", "src\Victory.Network.Domain\Victory.Network.Domain.csproj", "{FBC4059F-8E36-4072-9D52-C5ADFE5CD274}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -49,6 +51,10 @@ Global
 		{55774561-63EF-4602-8B23-250692D0EDDC}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{55774561-63EF-4602-8B23-250692D0EDDC}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{55774561-63EF-4602-8B23-250692D0EDDC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FBC4059F-8E36-4072-9D52-C5ADFE5CD274}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FBC4059F-8E36-4072-9D52-C5ADFE5CD274}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FBC4059F-8E36-4072-9D52-C5ADFE5CD274}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FBC4059F-8E36-4072-9D52-C5ADFE5CD274}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -62,6 +68,7 @@ Global
 		{F44647D2-2567-4B65-AE29-6ACE8D4A0718} = {52020FEA-CB66-4ABC-B777-EE59D8494A2E}
 		{52020FEA-CB66-4ABC-B777-EE59D8494A2E} = {E7CC6CF7-F3F1-4EA7-AC8F-31B9A889B94D}
 		{55774561-63EF-4602-8B23-250692D0EDDC} = {52020FEA-CB66-4ABC-B777-EE59D8494A2E}
+		{FBC4059F-8E36-4072-9D52-C5ADFE5CD274} = {C1B05148-68B4-4A08-8B18-396220665F78}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {75DC8B3A-B9C2-4F23-B106-0A7F6A82F9A9}

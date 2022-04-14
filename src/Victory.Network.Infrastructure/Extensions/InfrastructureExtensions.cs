@@ -1,7 +1,7 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Victory.Network.Infrastructure.HttpClients.PlatormWebSiteApi;
-using Victory.Network.Infrastructure.UnitOfWork;
+using Victory.Network.Infrastructure.Repositories;
 
 namespace Victory.Network.Infrastructure.Extensions
 {
@@ -15,7 +15,7 @@ namespace Victory.Network.Infrastructure.Extensions
 
         public static void AddInfrastructure(this IServiceCollection services, IConfiguration configuration)
         {
-            services.AddDataAccess(configuration);
+            services.AddRepositories(configuration);
             services.AddPlatormWebSiteApi(configuration);
         }
     }

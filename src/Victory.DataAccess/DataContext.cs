@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace Victory.DataAccess
 {
-    public sealed class DataContext<T> : IDataContext where T: DbConnection
+    public sealed class DataContext<TConnection> : IDataContext where TConnection : DbConnection
     {
         #region Fields
 
@@ -24,7 +24,7 @@ namespace Victory.DataAccess
         public DataContext(string connectionString)
         {
             _connectionString = connectionString;
-            _connection = (T)Activator.CreateInstance(typeof(T), connectionString);
+            _connection = (TConnection)Activator.CreateInstance(typeof(TConnection), connectionString);
         }
 
         public string ConnectionString

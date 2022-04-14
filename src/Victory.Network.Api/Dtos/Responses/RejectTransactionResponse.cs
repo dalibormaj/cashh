@@ -2,7 +2,7 @@
 
 namespace Victory.Network.Api.Dtos.Responses
 {
-    public class RejectTransactionResponse
+    public class RejectTransactionResponse : BaseResponse
     {
         public long TransactionId { get; set; }
         public string TypeCode { get; set; }

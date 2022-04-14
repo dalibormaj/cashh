@@ -2,7 +2,7 @@
 
 namespace Victory.Network.Api.Dtos.Responses
 {
-    public class VerifyTransactionResponse
+    public class VerifyTransactionResponse : BaseResponse
     {
         public long TransactionId { get; set; }
         public string TypeCode { get; set; }

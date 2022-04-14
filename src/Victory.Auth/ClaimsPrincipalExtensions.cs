@@ -15,7 +15,7 @@ namespace Victory.Auth
             return Convert.ToInt32(userId);
         }
 
-        public static string? GetUserName(this ClaimsPrincipal user)
+        public static string GetUserName(this ClaimsPrincipal user)
         {
             var userName = user.Claims?.ToList().SingleOrDefault(x => "UserName".Equals(x.Type, StringComparison.OrdinalIgnoreCase)).Value;
             return userName;

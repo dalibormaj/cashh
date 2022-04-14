@@ -26,7 +26,7 @@ namespace Victory.Auth.HttpClients.Guardian
                 Token = token
             };
 
-            var jsonRequest = JsonSerializer.Serialize(request, GetType());
+            var jsonRequest = JsonSerializer.Serialize(request);
 
             var response = await _httpClient.PostAsync("/auth/validate", new StringContent(jsonRequest, Encoding.UTF8, "application/json"));
 

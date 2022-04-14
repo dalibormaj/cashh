@@ -1,4 +1,4 @@
-﻿namespace Victory.Network.Infrastructure.UnitOfWork.Settings
+﻿namespace Victory.Network.Infrastructure.Repositories.Settings
 {
     public class DatabaseSettings
     {
