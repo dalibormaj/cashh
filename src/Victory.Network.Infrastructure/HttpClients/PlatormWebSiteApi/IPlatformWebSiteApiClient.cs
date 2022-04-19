@@ -4,8 +4,9 @@ using Victory.Network.Infrastructure.HttpClients.PlatormWebSiteApi.Dtos.Response
 
 namespace Victory.Network.Infrastructure.HttpClients.PlatormWebSiteApi
 {
-    public interface IPlatormWebSiteApiClient
+    public interface IPlatformWebSiteApiClient
     {
         Task<RegisterUserResponse> RegisterUserAsync(RegisterUserRequest request);
+        Task<CanLoginWithResponse> CanLoginWithAsync(CanLoginWithRequest request);
     }
 }

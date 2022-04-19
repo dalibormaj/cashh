@@ -4,9 +4,9 @@ using System;
 
 namespace Victory.Network.Infrastructure.HttpClients.PlatormWebSiteApi
 {
-    public static class PlatormWebSiteApiExtensions
+    internal static class PlatformWebSiteApiExtensions
     {
-        public static PlatormWebSiteApiSettings GetPlatormWebSiteApiSettings(this IConfiguration configuration)
+        public static PlatormWebSiteApiSettings GetPlatformWebSiteApiSettings(this IConfiguration configuration)
         {
             PlatormWebSiteApiSettings settings = new PlatormWebSiteApiSettings();
             configuration.GetSection(typeof(PlatormWebSiteApiSettings).Name).Bind(settings);
@@ -14,10 +14,10 @@ namespace Victory.Network.Infrastructure.HttpClients.PlatormWebSiteApi
             return settings;
         }
 
-        public static void AddPlatormWebSiteApi(this IServiceCollection services, IConfiguration configuration)
+        internal static void AddPlatformWebSiteApiClient(this IServiceCollection services, IConfiguration configuration)
         {
-            var settings = configuration.GetPlatormWebSiteApiSettings();
-            services.AddHttpClient<IPlatormWebSiteApiClient, PlatormWebSiteApiClient>(config =>
+            var settings = configuration.GetPlatformWebSiteApiSettings();
+            services.AddHttpClient<IPlatformWebSiteApiClient, PlatormWebSiteApiClient>(config =>
             {
                 config.BaseAddress = new Uri(settings.Url);
             });

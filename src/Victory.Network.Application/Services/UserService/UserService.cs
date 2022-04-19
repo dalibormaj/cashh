@@ -1,34 +1,45 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using Victory.DataAccess;
-using Victory.Network.Application.Services.UserService.Outputs;
 using Victory.Network.Domain.Models;
 using Victory.Network.Infrastructure.Errors;
+using Victory.Network.Infrastructure.HttpClients.InternalApi;
+using Victory.Network.Infrastructure.HttpClients.InternalApi.Dtos.Requests;
+using Victory.Network.Infrastructure.HttpClients.InternalApi.Dtos.Responses;
 using Victory.Network.Infrastructure.HttpClients.PlatormWebSiteApi;
 using Victory.Network.Infrastructure.HttpClients.PlatormWebSiteApi.Dtos.Requests;
 using Victory.Network.Infrastructure.Repositories;
-using Victory.Network.Infrastructure.Repositories.Abstraction;
+
 
 namespace Victory.Network.Application.Services.UserService
 {
     public class UserService : IUserService
     {
-        IPlatormWebSiteApiClient _platormWebSiteApiClient;
+        IPlatformWebSiteApiClient _platormWebSiteApiClient;
+        IInternalApiClient _internalApiClient;
         ILogger<UserService> _logger;
         IUnitOfWork _unitOfWork;
 
-        public UserService(ILogger<UserService> logger, IPlatormWebSiteApiClient platormWebSiteApiClient, IUnitOfWork unitOfWork)
+        public UserService(ILogger<UserService> logger, 
+                           IPlatformWebSiteApiClient platormWebSiteApiClient, 
+                           IInternalApiClient internalApiClient, 
+                           IUnitOfWork unitOfWork)
         {
             _platormWebSiteApiClient = platormWebSiteApiClient;
+            _internalApiClient = internalApiClient;
             _logger = logger;
             _unitOfWork = unitOfWork;
         }
 
-        public async Task<RegisterUserOutput> RegisterUserAsync (int agentId,
+        public async Task<GetUserDetailsResponse> GetUser(string identifier)
+        {
+            var user =  await _internalApiClient.GetUserDetails(new GetUserDetailsRequest() { TpsUserId = identifier });
+            return user;
+        }
+
+        public async Task<int> RegisterUserAsync (int registedByUserId,
                                                                  string citizenId, 
                                                                  string emailVerificationUrl, 
                                                                  string email,
@@ -63,17 +74,14 @@ namespace Victory.Network.Application.Services.UserService
             }
 
             var userId = Convert.ToInt32(response.Result.UserId);
-
-            //dummy data
             var user = new User()
             {
                 UserId = userId,
-                ParentId = agentId
+                ParentId = registedByUserId
             };
             await _unitOfWork.GetRepository<UserRepository>().SaveUser(user);
-            
 
-            return new RegisterUserOutput(userId);
+            return userId;
         }
     }
 }

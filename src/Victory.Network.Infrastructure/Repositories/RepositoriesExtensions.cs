@@ -10,7 +10,7 @@ using Victory.Network.Infrastructure.Repositories.Settings;
 
 namespace Victory.Network.Infrastructure.Repositories
 {
-    public static class RepositoriesExtensions
+    internal static class RepositoriesExtensions
     {
         public static DatabaseSettings GetDatabaseSettings(this IConfiguration configuration)
         {
@@ -20,7 +20,7 @@ namespace Victory.Network.Infrastructure.Repositories
             return settings;
         }
 
-        public static void AddRepositories(this IServiceCollection services, IConfiguration configuration)
+        internal static void AddRepositories(this IServiceCollection services, IConfiguration configuration)
         {
             var dbSettings = configuration.GetDatabaseSettings();
 

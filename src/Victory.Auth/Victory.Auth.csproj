@@ -9,11 +9,14 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Remove="mdwn1ixs.fvm~" />
+    <Compile Remove="Policies\**" />
+    <Content Remove="Policies\**" />
+    <EmbeddedResource Remove="Policies\**" />
+    <None Remove="Policies\**" />
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Policies\" />
+    <None Remove="mdwn1ixs.fvm~" />
   </ItemGroup>
 
   <ItemGroup>
