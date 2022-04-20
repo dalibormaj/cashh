@@ -6,9 +6,9 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using NSwag.AspNetCore;
 using System.Text.Json.Serialization;
-using Victory.Auth;
 using Victory.Network.Api.Extensions;
 using Victory.Network.Api.Middlewares;
+using Victory.Network.Api.Workers;
 using Victory.Network.Application.Extensions;
 using Victory.Network.Infrastructure.Extensions;
 using Victory.Network.Infrastructure.Resources;
@@ -45,6 +45,7 @@ namespace Victory.Network
             services.AddVictoryApi(Configuration);
             services.AddVictoryApplication();
             services.AddVictoryInfrastructure(Configuration);
+            services.AddConsumerWorker(Configuration);
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
