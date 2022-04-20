@@ -6,7 +6,7 @@ namespace Victory.Network.Application.Services.AgentService
     {
         public async Task RegisterAgentAsync()
         {
-
+            
         }
     }
 }

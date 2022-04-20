@@ -21,6 +21,8 @@ namespace Victory.Network.Infrastructure.Errors
         [Description("IsPoliticallyExposed missing")]
         IS_POLITICALLY_EXPOSED_MISSING,
         [Description("ReceiveMarketingMessage missing")]
-        RECEIVE_MARKETING_MESSAGES_MISSING
+        RECEIVE_MARKETING_MESSAGES_MISSING,
+        [Description("Insufficient funds")]
+        INSUFFICIENT_FUNDS
     }
 }

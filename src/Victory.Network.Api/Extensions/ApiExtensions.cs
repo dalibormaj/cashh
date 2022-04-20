@@ -1,7 +1,9 @@
 ﻿using AutoMapper;
 using FluentValidation;
 using Microsoft.AspNetCore.Mvc.ApiExplorer;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Net.Http.Headers;
 using NSwag;
 using System.Reflection;
 using Victory.Auth;
@@ -13,9 +15,8 @@ namespace Victory.Network.Api.Extensions
 {
     public static class ApiExtensions
     {
-        public static void AddSwagger(this IServiceCollection services)
+        private static void AddSwagger(this IServiceCollection services)
         {
-
             services.AddApiVersioning();
             services.AddVersionedApiExplorer(options =>
             {
@@ -38,7 +39,7 @@ namespace Victory.Network.Api.Extensions
                     {
                         Description = @"Authorization header using the Bearer scheme. Enter your token in the text input below.
                                         Example: 'kJ8aCbzuMRezSblLVmQlMSZB1ajPS5PtT23hS8QIuqBpYphHx4izc'",
-                        Name = "Authorization",
+                        Name = HeaderNames.Authorization,
                         In = OpenApiSecurityApiKeyLocation.Header,
                         Type = OpenApiSecuritySchemeType.Http,
                         Scheme = AuthSchema.BEARER
@@ -46,9 +47,8 @@ namespace Victory.Network.Api.Extensions
 
                     document.AddSecurity(AuthSchema.AZURE_AD, new OpenApiSecurityScheme
                     {
-                        Description = @"Authorization header using the Bearer scheme. Enter your token in the text input below.
-                                        Example: 'kJ8aCbzuMRezSblLVmQlMSZB1ajPS5PtT23hS8QIuqBpYphHx4izc'",
-                        Name = "Authorization",
+                        Description = @"Azure AD",
+                        Name = HeaderNames.Authorization,
                         In = OpenApiSecurityApiKeyLocation.Header,
                         Type = OpenApiSecuritySchemeType.ApiKey,
                         Scheme = AuthSchema.AZURE_AD
@@ -57,21 +57,29 @@ namespace Victory.Network.Api.Extensions
             }
         }
 
-        public static void AddMappers(this IServiceCollection services)
+        private static void AddMappers(this IServiceCollection services)
         {
             var mapperConfig = new MapperConfiguration(mc =>
             {
-                mc.AddProfile(new UserServiceProfile());
+                mc.AddProfile(new UserControllerProfile());
             });
 
             IMapper mapper = mapperConfig.CreateMapper();
             services.AddSingleton(mapper);
         }
 
-        public static void AddValidators(this IServiceCollection services)
+        private static void AddValidators(this IServiceCollection services)
         {
             services.AddTransient<IGlobalValidator, GlobalValidator>();
             services.AddTransient<IValidator<RegisterUserRequest>, RegisterUserRequestValidator>();
+        }
+
+        public static void AddVictoryApi(this IServiceCollection services, IConfiguration configuration)
+        {
+            services.AddSwagger();
+            services.AddValidators();
+            services.AddMappers();
+            services.AddVictoryAuth(configuration);
         }
     }
 }
