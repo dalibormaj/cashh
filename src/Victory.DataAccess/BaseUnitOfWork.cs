@@ -20,7 +20,7 @@ namespace Victory.DataAccess
         public IDbTransaction BeginTransaction()
         {
             if (_dataContext.Connection == null) 
-                throw new InvalidOperationException("Transaction cannot start on empty connection. Check DataContext!");
+                throw new InvalidOperationException("Transaction cannot start on an empty connection. Check DataContext!");
             return _dataContext.BeginTransaction();
         }
 

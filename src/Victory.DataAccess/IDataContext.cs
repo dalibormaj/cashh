@@ -21,15 +21,15 @@ namespace Victory.DataAccess
         (List<T>, List<U>) ExecuteReaderProcedure<T, U>(string storedProcedureName, object parameters = null);
         #endregion
 
-        #region Async Methods
-        Task<List<IDictionary<string, object>>> ExecuteSqlAsync(string sql);
-        Task<List<T>> ExecuteSqlAsync<T>(string sql);
-        Task<List<T>> ExecuteSqlAsync<T>(string sql, IMapper mapper);
-        Task<int> ExecuteProcedureAsync(string storedProcedureName, object parameters = null);
-        Task<List<IDictionary<string, object>>> ExecuteReaderProcedureAsync(string storedProcedureName, object parameters = null);
-        Task<List<T>> ExecuteReaderProcedureAsync<T>(string storedProcedureName, object parameters = null);
-        Task<List<T>> ExecuteReaderProcedureAsync<T>(string storedProcedureName, IMapper mapper, object parameters = null);
-        #endregion
+        //#region Async Methods
+        //Task<List<IDictionary<string, object>>> ExecuteSqlAsync(string sql);
+        //Task<List<T>> ExecuteSqlAsync<T>(string sql);
+        //Task<List<T>> ExecuteSqlAsync<T>(string sql, IMapper mapper);
+        //Task<int> ExecuteProcedureAsync(string storedProcedureName, object parameters = null);
+        //Task<List<IDictionary<string, object>>> ExecuteReaderProcedureAsync(string storedProcedureName, object parameters = null);
+        //Task<List<T>> ExecuteReaderProcedureAsync<T>(string storedProcedureName, object parameters = null);
+        //Task<List<T>> ExecuteReaderProcedureAsync<T>(string storedProcedureName, IMapper mapper, object parameters = null);
+        //#endregion
 
         IDbConnection Connection { get; }
         void OpenConnection();

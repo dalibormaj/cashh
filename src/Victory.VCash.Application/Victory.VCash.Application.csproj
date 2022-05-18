@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="Services\UserService\Inputs\**" />
+    <EmbeddedResource Remove="Services\UserService\Inputs\**" />
+    <None Remove="Services\UserService\Inputs\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Victory.VCash.Infrastructure\Victory.VCash.Infrastructure.csproj" />
+  </ItemGroup>
+
+</Project>

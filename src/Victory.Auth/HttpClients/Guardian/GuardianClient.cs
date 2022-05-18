@@ -21,17 +21,23 @@ namespace Victory.Auth.HttpClients.Guardian
         {
             if (_httpClient == null) throw new InvalidOperationException("GuardianClient cannot be created");
 
-            var request = new ValidateTokenRequest()
+            try
             {
-                Token = token
+                var request = new ValidateTokenRequest()
+                {
+                    Token = token
+                };
+
+                var jsonRequest = JsonSerializer.Serialize(request);
+                var response = await _httpClient.PostAsync("/auth/validate", new StringContent(jsonRequest, Encoding.UTF8, "application/json"));
+                var jsonResponse = await response.Content?.ReadAsStringAsync();
+            
+                return JsonSerializer.Deserialize<ValidateTokenResponse>(jsonResponse);
+            }
+            catch (Exception ex)
+            {
+                throw new InvalidOperationException("Auth token validation failed", ex);
             };
-
-            var jsonRequest = JsonSerializer.Serialize(request);
-
-            var response = await _httpClient.PostAsync("/auth/validate", new StringContent(jsonRequest, Encoding.UTF8, "application/json"));
-
-            var jsonResponse = await response.Content?.ReadAsStringAsync();
-            return JsonSerializer.Deserialize<ValidateTokenResponse>(jsonResponse);
         }
     }
 }

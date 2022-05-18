@@ -14,6 +14,6 @@
 
     public class AzureAdSettings
     {
-
+        public string OpenIdConfigUrl { get; set; }
     }
 }
