@@ -5,6 +5,7 @@ using Microsoft.Extensions.Options;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Text.Json;
 using System.Threading.Tasks;
 using Victory.VCash.Api.Controllers.Dtos;
@@ -40,6 +41,8 @@ namespace Victory.VCash.Api.Middlewares
         private async Task HandleGlobalExceptionAsync(HttpContext context, Exception exception, IOptions<JsonOptions> jsonOptions)
         {
             context.Response.ContentType = "application/json";
+
+            //CONTENT
             BaseResponse response = new BaseResponse() { Errors = new List<ErrorDto>() };
             if (exception is BaseException ex && ex?.Errors != null)
             {
@@ -63,8 +66,16 @@ namespace Victory.VCash.Api.Middlewares
             
             var responseJson = JsonSerializer.Serialize(response, jsonOptions.Value.JsonSerializerOptions);
 
-            if (exception is BaseException)
-                //internal errors log as warnings
+            //STATUS CODE
+            if(exception is UnauthorizedAccessException)
+            {
+                context.Response.StatusCode = (int)HttpStatusCode.Unauthorized;
+            }
+
+
+            //LOG
+            if (exception is BaseException ||
+                exception is UnauthorizedAccessException)
                 _logger.LogWarning(exception, $"Response: {responseJson}");
             else
                 _logger.LogError(exception, $"Response: {responseJson}");

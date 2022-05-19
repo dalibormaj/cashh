@@ -7,7 +7,7 @@ namespace Victory.Auth
 {
     public static class ClaimsPrincipalExtensions
     {
-        public static int? GetId(this ClaimsPrincipal user)
+        public static int? GetUserId(this ClaimsPrincipal user)
         {
             var userId = user.Claims?.ToList().SingleOrDefault(x => "UserId".Equals(x.Type, StringComparison.OrdinalIgnoreCase))?.Value;
             if (string.IsNullOrEmpty(userId))

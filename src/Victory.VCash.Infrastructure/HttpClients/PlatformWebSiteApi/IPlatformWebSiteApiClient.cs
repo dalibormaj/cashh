@@ -8,7 +8,7 @@ namespace Victory.VCash.Infrastructure.HttpClients.PlatformWebSiteApi
     {
         Task<RegisterUserResponse> RegisterUserAsync(RegisterUserRequest request);
         Task<CanLoginWithResponse> CanLoginWithAsync(string userName);
-        Task<RequestPasswordResetResponse> RequestPasswordResetAsync(RequestPasswordResetRequest request);
+        Task<DefaultResponse> RequestPasswordResetAsync(RequestPasswordResetRequest request);
         Task<DefaultResponse> CompletePasswordResetAsync(CompletePasswordResetRequest request);
     }
 }

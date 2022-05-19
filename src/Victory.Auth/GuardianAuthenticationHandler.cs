@@ -35,9 +35,7 @@ namespace Victory.Auth
                 return AuthenticateResult.Fail($"Bearer token missing. Check if Authorization header starts with the Bearer key");
 
             var token = authHeaderValue.Substring("Bearer".Length).Trim();
-            
             var validateResponse = await _guardianClient.ValidateTokenAsync(token);
-
             var isValid = validateResponse?.IsValidated ?? false;
 
             if (!isValid)

@@ -27,7 +27,7 @@ namespace Victory.VCash.Api.Controllers
         public async Task<CreateMoneyTransferResponse> DepositAsync(DepositRequest request)
         {
             GlobalValidator.Validate(request);
-            var agentId = HttpContext.User.GetId() ?? throw new ArgumentException("AgentId not found");
+            var agentId = HttpContext.User.GetUserId() ?? throw new ArgumentException("AgentId not found");
             var moneyTransfer = await _moneyTransferService.CreateAsync(agentId, request.ToUserId, request.Amount);
 
             return new CreateMoneyTransferResponse()
@@ -42,7 +42,7 @@ namespace Victory.VCash.Api.Controllers
         public async Task<CreateMoneyTransferResponse> PayoutAsync(PayoutRequest request)
         {
             GlobalValidator.Validate(request);
-            var agentId = HttpContext.User.GetId() ?? throw new ArgumentException("AgentId not found");
+            var agentId = HttpContext.User.GetUserId() ?? throw new ArgumentException("AgentId not found");
 
             var moneyTransfer = await _moneyTransferService.CreateAsync(request.FromUserId, agentId, request.Amount);
 
@@ -70,7 +70,7 @@ namespace Victory.VCash.Api.Controllers
         public GetMoneyTransfersResponse GetMoneyTransfers([FromQuery] GetMoneyTransferFilterRequest filter)
         {
             GlobalValidator.Validate(filter);
-            var agentId = HttpContext.User.GetId() ?? throw new ArgumentException("AgentId not found");
+            var agentId = HttpContext.User.GetUserId() ?? throw new ArgumentException("AgentId not found");
 
             var moneyTransfers = _moneyTransferService.GetMoneyTransfers(filter.MoneyTransferId,
                                                                          agentId,

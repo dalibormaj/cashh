@@ -95,8 +95,10 @@ namespace Victory.VCash
 
             app.UseCors(_corsPolicyName);
 
+            //note: order is important
             app.UseMiddleware<LanguageMiddleware>();
-            app.UseMiddleware<ExceptionMiddleware>();         
+            app.UseMiddleware<ExceptionMiddleware>();
+            app.UseMiddleware<OperatorMiddleware>();
 
             app.UseHttpsRedirection();
             app.UseRouting();

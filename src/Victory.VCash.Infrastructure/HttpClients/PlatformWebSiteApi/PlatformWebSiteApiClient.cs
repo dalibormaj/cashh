@@ -41,18 +41,18 @@ namespace Victory.VCash.Infrastructure.HttpClients.PlatformWebSiteApi
             return await response.ConvertToAsync<RegisterUserResponse>();
         }
 
-        public async Task<RequestPasswordResetResponse> RequestPasswordResetAsync(RequestPasswordResetRequest request)
+        public async Task<DefaultResponse> RequestPasswordResetAsync(RequestPasswordResetRequest request)
         {
             var response = await _httpClient.PostAsync("/api/Security/Accounts/RequestPasswordReset", request.ToStringContent());
-            try
-            {
-                return await response.ConvertToAsync<RequestPasswordResetResponse>();
-            }
-            catch
-            {
-                var defaultResponse = response.ConvertTo<DefaultResponse>();
-                throw new Exception($"{_httpClient.BaseAddress} responded with '{defaultResponse.Result?.ToList().FirstOrDefault() ?? defaultResponse.ResponseMessage}'");
-            }
+            //try
+            //{
+                return await response.ConvertToAsync<DefaultResponse>();
+            //}
+            //catch
+            //{
+            //    var defaultResponse = response.ConvertTo<DefaultResponse>();
+            //    throw new Exception($"{_httpClient.BaseAddress} responded with '{defaultResponse.Result?.ToList().FirstOrDefault() ?? defaultResponse.ResponseMessage}'");
+            //}
         }
 
         public async Task<DefaultResponse> CompletePasswordResetAsync(CompletePasswordResetRequest request)

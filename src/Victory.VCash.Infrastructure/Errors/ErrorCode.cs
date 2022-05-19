@@ -35,6 +35,8 @@ namespace Victory.VCash.Infrastructure.Errors
         [Description("Invalid money transfer")]
         INVALID_MONEY_TRANSFER,
         [Description("Money transfer cannot be processed {0}")]
-        MONEY_TRANSFER_CANNOT_BE_PROCESSED
+        MONEY_TRANSFER_CANNOT_BE_PROCESSED,
+        [Description("Password reset cannot complete")]
+        PASSWORD_RESET_CANNOT_COMPLETE
     }
 }

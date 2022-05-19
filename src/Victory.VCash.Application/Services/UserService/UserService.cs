@@ -32,11 +32,6 @@ namespace Victory.VCash.Application.Services.UserService
             _unitOfWork = unitOfWork;
         }
 
-        public async Task CompletePasswordResetAsync(string newPassword, string token)
-        {
-            await _platformWebSiteApiClient.CompletePasswordResetAsync(new CompletePasswordResetRequest() { NewPassword = newPassword, ResetToken = token });
-        }
-
         public async Task<User> GetAgentAsync(string identifier)
         {
             var user = await GetUserAsync(identifier);
@@ -116,12 +111,21 @@ namespace Victory.VCash.Application.Services.UserService
 
         public async Task RequestPasswordResetAsync(string userIdentifier, string passwordResetUrl)
         {
-            //var user = await GetUserAsync(userIdentifier);
-            await _platformWebSiteApiClient.RequestPasswordResetAsync(new RequestPasswordResetRequest() 
+            var response = await _platformWebSiteApiClient.RequestPasswordResetAsync(new RequestPasswordResetRequest() 
             { 
-                UserName = "dalibormajj163", //user.UserName, 
+                UserName = userIdentifier,
                 PasswordResetPageUrl = passwordResetUrl 
             });
+
+            if (response.ResponseCode != 0)
+                throw new VCashException(ErrorCode.AGENT_DOES_NOT_EXIST);
+        }
+
+        public async Task CompletePasswordResetAsync(string newPassword, string token)
+        {
+            var response = await _platformWebSiteApiClient.CompletePasswordResetAsync(new CompletePasswordResetRequest() { NewPassword = newPassword, ResetToken = token });
+            if (response.ResponseCode != 0)
+                throw new VCashException(ErrorCode.PASSWORD_RESET_CANNOT_COMPLETE);
         }
     }
 }

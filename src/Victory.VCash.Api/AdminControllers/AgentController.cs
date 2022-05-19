@@ -6,6 +6,7 @@ using Victory.Auth;
 using Victory.VCash.Api.AdminControllers.Dtos.Requests;
 using Victory.VCash.Api.AdminControllers.Dtos.Responses;
 using Victory.VCash.Api.Controllers;
+using Victory.VCash.Api.Extensions;
 
 namespace Victory.VCash.Api.AdminControllers
 {
@@ -23,7 +24,6 @@ namespace Victory.VCash.Api.AdminControllers
         [Authorize(AuthSchema.AZURE_AD)]
         public async Task<_RegisterAgentResponse> GetAdmin()
         {
-            var user = HttpContext.User.GetUserName();
             return new _RegisterAgentResponse();
         }
 
