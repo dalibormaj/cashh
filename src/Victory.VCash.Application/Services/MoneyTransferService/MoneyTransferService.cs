@@ -28,11 +28,11 @@ namespace Victory.VCash.Application.Services.MoneyTransferService
 
 
         //transfer funds between users
-        public async Task<MoneyTransfer> CreateAsync(int fromUserId, int toUserId, decimal amount)
+        public async Task<MoneyTransfer> CreateAsync(int fromUserId, int toUserId, decimal amount, string cashierId = "")
         {
-            var moneyTransfer = _provider.Create(fromUserId, toUserId, amount);
+            var moneyTransfer = _provider.Create(fromUserId, toUserId, amount, cashierId);
 
-            if(moneyTransfer.MoneyTransferStatusId == MoneyTransferStatus.PENDING_APPROVAL) 
+            if (moneyTransfer.MoneyTransferStatusId == MoneyTransferStatus.PENDING_APPROVAL) 
                 return await _provider.ProcessAsync(moneyTransfer.MoneyTransferId);
 
             return await _provider.ProcessAsync(moneyTransfer.MoneyTransferId, MoneyTransferStatus.COMPLETED);

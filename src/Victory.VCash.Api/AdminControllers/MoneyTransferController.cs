@@ -13,6 +13,7 @@ namespace Victory.VCash.Api.AdminControllers
 {
     [ApiExplorerSettings(GroupName = ControllerGroupName.ADMIN)]
     [Route("admin/money-transfer")]
+    [Authorize(AuthSchema.AZURE_AD)]
     public class MoneyTransferController : BaseController
     {
         private readonly IMoneyTransferService _moneyTransferService;
@@ -23,7 +24,6 @@ namespace Victory.VCash.Api.AdminControllers
 
         [HttpPost]
         [Route("verify")]
-        [Authorize(AuthSchema.AZURE_AD)]
         public async Task<_CreateMoneyTransferResponse> VerifyMoneyTransfer(_VerifyMoneyTransferRequest request)
         {
             return new _CreateMoneyTransferResponse();
@@ -31,7 +31,6 @@ namespace Victory.VCash.Api.AdminControllers
 
         [HttpPost]
         [Route("reject")]
-        [Authorize(AuthSchema.AZURE_AD)]
         public async Task<_CreateMoneyTransferResponse> RejectMoneyTransfer(_RejectMoneyTransferRequest request)
         {
             return new _CreateMoneyTransferResponse();
@@ -39,7 +38,6 @@ namespace Victory.VCash.Api.AdminControllers
 
         [HttpGet]
         [Route("")]
-        [Authorize(AuthSchema.AZURE_AD)]
         public _GetMoneyTransfersResponse GetMoneyTransfers([FromQuery] _GetMoneyTransferFilterRequest filter)
         {
             GlobalValidator.Validate(filter);

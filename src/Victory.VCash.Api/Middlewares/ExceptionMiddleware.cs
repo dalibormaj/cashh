@@ -10,6 +10,7 @@ using System.Text.Json;
 using System.Threading.Tasks;
 using Victory.VCash.Api.Controllers.Dtos;
 using Victory.VCash.Api.Controllers.Dtos.Responses;
+using Victory.VCash.Infrastructure.Common;
 using Victory.VCash.Infrastructure.Errors;
 using Victory.VCash.Infrastructure.Extensions;
 
@@ -55,24 +56,24 @@ namespace Victory.VCash.Api.Middlewares
             }
 
             //if there is no error codes use exception message
+            var defaultErrorCode = ErrorCode.SYSTEM_ERROR;
+            if(exception is VCashBadRequestException)
+                defaultErrorCode = ErrorCode.BAD_REQUEST;
+
             if (!(response?.Errors?.Any() ?? false))
             {
                 response.Errors.Add(new ErrorDto()
                 {
-                    Code = ErrorCode.SYSTEM_ERROR,
-                    Description = string.Format(ErrorCode.SYSTEM_ERROR.GetDescription(true), exception.Message)
+                    Code = defaultErrorCode,
+                    Description = string.Format(defaultErrorCode.GetDescription(true), exception.Message)
                 });
             }
             
             var responseJson = JsonSerializer.Serialize(response, jsonOptions.Value.JsonSerializerOptions);
 
             //STATUS CODE
-            if(exception is UnauthorizedAccessException)
-            {
-                context.Response.StatusCode = (int)HttpStatusCode.Unauthorized;
-            }
-
-
+            context.Response.StatusCode = (int)GetHttpStatusCode(exception);
+            
             //LOG
             if (exception is BaseException ||
                 exception is UnauthorizedAccessException)
@@ -81,6 +82,17 @@ namespace Victory.VCash.Api.Middlewares
                 _logger.LogError(exception, $"Response: {responseJson}");
 
             await context.Response.WriteAsync(responseJson);
+        }
+
+        private HttpStatusCode GetHttpStatusCode(Exception ex)
+        {
+            if (ex is VCashBadRequestException)
+                return HttpStatusCode.BadRequest;
+
+            if(ex is UnauthorizedAccessException)
+                return HttpStatusCode.Unauthorized;
+
+            return HttpStatusCode.OK;
         }
     }
 }

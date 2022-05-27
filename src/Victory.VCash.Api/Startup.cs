@@ -44,7 +44,7 @@ namespace Victory.VCash
                         x.InvalidModelStateResponseFactory = context =>
                         {
                             var errorMessage = GetErrorMessage(context);
-                            throw new VCashException(ErrorCode.SYSTEM_ERROR, errorMessage);
+                            throw new VCashBadRequestException(ErrorCode.BAD_REQUEST, errorMessage);
                         };
                     });
             services.AddHttpContextAccessor();
@@ -98,15 +98,18 @@ namespace Victory.VCash
             //note: order is important
             app.UseMiddleware<LanguageMiddleware>();
             app.UseMiddleware<ExceptionMiddleware>();
-            app.UseMiddleware<OperatorMiddleware>();
+            app.UseMiddleware<AuthCashierMiddleware>();
 
             app.UseHttpsRedirection();
             app.UseRouting();
+            app.UseAuthentication();
             app.UseAuthorization();
+            app.UseMiddleware<AuthAgentMiddleware>(); //note: it's important to execute after auth
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
             });
+
         }
 
         /// <summary>

@@ -29,7 +29,7 @@ namespace Victory.VCash.Application.Services.MoneyTransferService
             _unitOfWork = unitOfWork;
         }
 
-        public MoneyTransfer Create(int fromUserId, int toUserId, decimal amount)
+        public MoneyTransfer Create(int fromUserId, int toUserId, decimal amount, string cashierId = "")
         {
             var fromUser = _internalApiClient.GetUserDetailsAsync(new GetUserDetailsRequest() { TpsUserId = fromUserId.ToString() }).Result;
             var toUser = _internalApiClient.GetUserDetailsAsync(new GetUserDetailsRequest() { TpsUserId = toUserId.ToString() }).Result;
@@ -56,7 +56,7 @@ namespace Victory.VCash.Application.Services.MoneyTransferService
             var isDeposit = "PLYON".Equals(toUser.UserType.Code, StringComparison.OrdinalIgnoreCase);
             var needApprovalAmount = isDeposit ? 5000 : 500;
           
-            var maxDepositAmount = 6000;
+            var maxDepositAmount = 60000000;
             var minDepositAmount = 100;
 
             var maxPayoutAmount = 2000;
@@ -73,7 +73,8 @@ namespace Victory.VCash.Application.Services.MoneyTransferService
                 FromUserId = fromUserId,
                 ToUserId = toUserId,
                 Amount = amount,
-                MoneyTransferStatusId = amount <= needApprovalAmount ? MoneyTransferStatus.APPROVED : MoneyTransferStatus.PENDING_APPROVAL
+                MoneyTransferStatusId = amount <= needApprovalAmount ? MoneyTransferStatus.APPROVED : MoneyTransferStatus.PENDING_APPROVAL,
+                CreatedBy = cashierId
             };
 
             var fromTransactionTypeId = fromUser.UserType.Code?.ToUpper() switch

@@ -1,4 +1,5 @@
-﻿using System.Net.Http;
+﻿using System;
+using System.Net.Http;
 using System.Text.Json;
 using System.Threading.Tasks;
 
@@ -12,10 +13,19 @@ namespace Victory.VCash.Infrastructure.HttpClients
             return JsonSerializer.Deserialize<T>(jsonResponse);
         }
 
-        public async static Task<T> ConvertToAsync<T>(this HttpResponseMessage response)
+        public async static Task<T> ConvertToAsync<T>(this HttpResponseMessage response, bool returnDefaultIfFails = false)
         {
             var jsonResponse = await response.Content?.ReadAsStringAsync();
-            return JsonSerializer.Deserialize<T>(jsonResponse);
+            try 
+            { 
+                return JsonSerializer.Deserialize<T>(jsonResponse);
+            }
+            catch(Exception ex)
+            {
+                if(returnDefaultIfFails) 
+                    return default(T);
+                throw new Exception($"Failed while deserializing the response message", ex);
+            }
         }
     }
 }

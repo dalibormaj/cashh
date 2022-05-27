@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Threading.Tasks;
@@ -21,7 +22,7 @@ namespace Victory.VCash.Api.AdminControllers
 
         [HttpGet]
         [Route("")]
-        [Authorize(AuthSchema.AZURE_AD)]
+        [Authorize(AuthenticationSchemes = AuthSchema.AZURE_AD)]
         public async Task<_RegisterAgentResponse> GetAdmin()
         {
             return new _RegisterAgentResponse();
@@ -34,6 +35,5 @@ namespace Victory.VCash.Api.AdminControllers
         {
             return new _RegisterAgentResponse();
         }
-
     }
 }

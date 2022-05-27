@@ -8,9 +8,6 @@ namespace Victory.VCash.Application.Services.UserService
     public interface IUserService
     {
         Task<int> RegisterUserAsync(int registedByUserId, string citizenId, string emailVerificationUrl, string email, string mobilePhoneNumber, bool canReceiveMarketingMessages, bool IsPoliticallyExposed);
-        Task<User> GetUserAsync(string identifier);
-        Task<User> GetAgentAsync(string identifier);
-        Task RequestPasswordResetAsync(string userIdentifier, string passwordResetUrl);
-        Task CompletePasswordResetAsync(string newPassword, string token);
+        Task<GetUserOutput> GetUserAsync(string identifier, bool maskBasicValues = false);
     }
 }

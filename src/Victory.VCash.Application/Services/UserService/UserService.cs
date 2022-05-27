@@ -1,12 +1,16 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using System;
+using System.Linq;
 using System.Threading.Tasks;
 using Victory.DataAccess;
+using Victory.VCash.Application.Services.UserService.Outputs;
 using Victory.VCash.Domain.Enums;
 using Victory.VCash.Domain.Models;
+using Victory.VCash.Infrastructure.Common;
 using Victory.VCash.Infrastructure.Errors;
 using Victory.VCash.Infrastructure.HttpClients.InternalApi;
+using Victory.VCash.Infrastructure.HttpClients.InternalApi.Dtos.Requests;
 using Victory.VCash.Infrastructure.HttpClients.PlatformWebSiteApi;
 using Victory.VCash.Infrastructure.HttpClients.PlatformWebSiteApi.Dtos.Requests;
 using Victory.VCash.Infrastructure.Repositories;
@@ -32,23 +36,21 @@ namespace Victory.VCash.Application.Services.UserService
             _unitOfWork = unitOfWork;
         }
 
-        public async Task<User> GetAgentAsync(string identifier)
+        public async Task<GetUserOutput> GetUserAsync(string identifier, bool maskBasicValues = false)
         {
-            var user = await GetUserAsync(identifier);
-            if (user?.UserTypeId.Value != UserType.AGENT)
-                throw new VCashException(ErrorCode.AGENT_DOES_NOT_EXIST);
+            if (string.IsNullOrEmpty(identifier))
+                throw new VCashException(ErrorCode.USER_DOES_NOT_EXIST);
 
-            return user;
-        }
-
-        public async Task<User> GetUserAsync(string identifier)
-        {
-            bool isIdentifierNumber = int.TryParse(identifier, out _);
+            bool isIdentifierNumber = long.TryParse(identifier, out _);
+            bool isPhoneNumber = identifier.StartsWith("+") || 
+                                 (isIdentifierNumber && Convert.ToInt64(identifier) > 60000000 && Convert.ToInt64(identifier) < 700000000) ||
+                                 (identifier.StartsWith("381") && isIdentifierNumber && Convert.ToInt64(identifier) > 381600000);
+            bool isIndetierUserId = isIdentifierNumber && !isPhoneNumber;
             int? userId;
 
-            if (isIdentifierNumber)
+            if (isIndetierUserId)
             {
-                //if identifier is a number just parse to int
+                //if identifier is a userId just parse to int
                 userId = Convert.ToInt32(identifier);
             }
             else
@@ -61,8 +63,34 @@ namespace Victory.VCash.Application.Services.UserService
             if (userId == null)
                 throw new VCashException(ErrorCode.USER_DOES_NOT_EXIST);
 
-            var user = _unitOfWork.GetRepository<UserRepository>().GetUser(userId.Value);
-            return user;
+            var user = await _internalApiClient.GetUserDetailsAsync(new GetUserDetailsRequest() { TpsUserId = userId.ToString() });
+            if (user == null)
+                throw new VCashException(ErrorCode.USER_DOES_NOT_EXIST);
+
+            var output = new GetUserOutput()
+            {
+                UserId = Convert.ToInt32(user.UserId),
+                UserTypeCode = user.UserType.Code,
+                UserName = user.Username,
+                Email = user.Emails?.FirstOrDefault().Email,
+                Name = user.UserDetail?.Name,
+                LastName = user.UserDetail?.Surname,
+                MobilePhoneNumber = user.PhoneContactDetails?.FirstOrDefault()?.ContactNumber,
+                CitizenId = user.ExtraDetails?
+                                .FirstOrDefault(x => "Blinking.CitizenId".Equals(x.PropertyName, StringComparison.OrdinalIgnoreCase))
+                                .PropertyValue,
+                StatusCode = user.UserStatus.Code,
+                BirthDate = user.UserDetail.BirthDate
+            };
+
+            if (maskBasicValues) 
+            {
+                output.UserName = (identifier.Equals(output.UserName)) ? output.UserName : output.UserName.MaskRight("***");
+                output.MobilePhoneNumber = isPhoneNumber ? output.MobilePhoneNumber : output.MobilePhoneNumber.MaskRight("***");
+                output.CitizenId = (identifier.Equals(output.CitizenId)) ? output.CitizenId : output.CitizenId.MaskRight("***");
+            };
+
+            return output;
         }
 
         public async Task<int> RegisterUserAsync (int registedByUserId,
@@ -100,32 +128,7 @@ namespace Victory.VCash.Application.Services.UserService
             }
 
             var userId = Convert.ToInt32(response.Result.UserId);
-            var user = new User()
-            {
-                UserId = userId
-            };
-            _unitOfWork.GetRepository<UserRepository>().SaveUser(user);
-
             return userId;
-        }
-
-        public async Task RequestPasswordResetAsync(string userIdentifier, string passwordResetUrl)
-        {
-            var response = await _platformWebSiteApiClient.RequestPasswordResetAsync(new RequestPasswordResetRequest() 
-            { 
-                UserName = userIdentifier,
-                PasswordResetPageUrl = passwordResetUrl 
-            });
-
-            if (response.ResponseCode != 0)
-                throw new VCashException(ErrorCode.AGENT_DOES_NOT_EXIST);
-        }
-
-        public async Task CompletePasswordResetAsync(string newPassword, string token)
-        {
-            var response = await _platformWebSiteApiClient.CompletePasswordResetAsync(new CompletePasswordResetRequest() { NewPassword = newPassword, ResetToken = token });
-            if (response.ResponseCode != 0)
-                throw new VCashException(ErrorCode.PASSWORD_RESET_CANNOT_COMPLETE);
         }
     }
 }

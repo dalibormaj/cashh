@@ -6,6 +6,8 @@
     <Win32Resource />
     <OutputType>Library</OutputType>
     <StartupObject />
+    <GeneratePackageOnBuild>False</GeneratePackageOnBuild>
+    <Description>Victory authorization package for validating tokens that have been generated either by local Guardian or AzureAd</Description>
   </PropertyGroup>
 
   <ItemGroup>

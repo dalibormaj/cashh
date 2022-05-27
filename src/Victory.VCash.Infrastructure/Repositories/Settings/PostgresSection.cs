@@ -2,6 +2,6 @@
 {
     public class PostgresSection
     {
-        public string VictoryNetwork { get; set; }
+        public string VCash { get; set; }
     }
 }

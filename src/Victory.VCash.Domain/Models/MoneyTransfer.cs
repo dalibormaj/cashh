@@ -7,7 +7,7 @@ using Victory.VCash.Domain.Enums;
 
 namespace Victory.VCash.Domain.Models
 {
-    public class MoneyTransfer : BaseDomainModel
+    public class MoneyTransfer
     {
         public long MoneyTransferId { get; init; }
         public int FromUserId { get; set; }
@@ -16,8 +16,8 @@ namespace Victory.VCash.Domain.Models
         public MoneyTransferStatus MoneyTransferStatusId { get; set; }
         public string Error { get; set; }
         public string Note { get; set; }
-        public int CreatedByUserId { get; set; }
-        public int ModifiedByUserId { get; set; }
+        public string CreatedBy { get; set; }
+        public string ModifiedBy { get; set; }
         public DateTime? InsertDate { get; set; }
         public DateTime? UpdateDate { get; set; }
         public List<Transaction> Transactions { get; set; }

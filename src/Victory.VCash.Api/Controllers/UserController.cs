@@ -11,6 +11,7 @@ using Victory.VCash.Application.Services.UserService;
 namespace Victory.VCash.Api.Controllers
 {
     [Route("user")]
+    [Authorize(AuthenticationSchemes = AuthSchema.BEARER)]
     public class UserController : BaseController
     {
         private IUserService _userService;
@@ -27,21 +28,20 @@ namespace Victory.VCash.Api.Controllers
         //    GlobalValidator.Validate(request);
         //    var agentId = HttpContext.User.GetId() ?? throw new ArgumentException();
         //    var userId = await _userService.RegisterUserAsync(agentId,
-        //                                                      request.CitizenId, 
-        //                                                      request.EmailVerificationUrl, 
-        //                                                      request.Email, 
-        //                                                      request.MobilePhoneNumber, 
-        //                                                      (bool)request.ReceiveMarketingMessages, 
+        //                                                      request.CitizenId,
+        //                                                      request.EmailVerificationUrl,
+        //                                                      request.Email,
+        //                                                      request.MobilePhoneNumber,
+        //                                                      (bool)request.ReceiveMarketingMessages,
         //                                                      (bool)request.IsPoliticallyExposed);
         //    return new RegisterUserResponse() { UserId = userId };
         //}
 
-        //[HttpGet]
-        //[Authorize]
-        //public async Task<UserResponse> GetUser(string identifier)
-        //{
-        //    var user = await _userService.GetUser(identifier);
-        //    return Mapper.Map<UserResponse>(user);
-        //}
+        [HttpGet]
+        public async Task<GetUserResponse> GetUser(string identifier)
+        {
+            var user = await _userService.GetUserAsync(identifier, maskBasicValues: true);
+            return Mapper.Map<GetUserResponse>(user);
+        }
     }
 }

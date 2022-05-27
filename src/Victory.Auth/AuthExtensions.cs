@@ -1,9 +1,11 @@
 ﻿using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Protocols;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
+using Microsoft.Net.Http.Headers;
 using System;
 using Victory.Auth.HttpClients.Guardian;
 
@@ -19,7 +21,7 @@ namespace Victory.Auth
             return settings;
         }
 
-        public static void AddVictoryAuth(this IServiceCollection services, IConfiguration configuration, string defaultSchema = AuthSchema.BEARER)
+        public static void AddVictoryAuth(this IServiceCollection services, IConfiguration configuration)
         {
             var settings = configuration.GetAuthSettings();
 
@@ -35,31 +37,24 @@ namespace Victory.Auth
             OpenIdConnectConfiguration config = configManager.GetConfigurationAsync().Result;
             services.AddSingleton(config);
 
+            var defaultSchema = $"{AuthSchema.BEARER},{AuthSchema.AZURE_AD}";
             services.AddAuthentication(defaultSchema)
-                    .AddScheme<AuthenticationSchemeOptions, GuardianAuthenticationHandler>(AuthSchema.BEARER, o => { })
-                    .AddScheme<AuthenticationSchemeOptions, AzureAdAuthenticationHandler>(AuthSchema.AZURE_AD, o => { });
+                    .AddScheme<AuthenticationSchemeOptions, GuardianAuthenticationHandler>(AuthSchema.BEARER, AuthSchema.BEARER, o => { })
+                    .AddScheme<AuthenticationSchemeOptions, AzureAdAuthenticationHandler>(AuthSchema.AZURE_AD, AuthSchema.AZURE_AD, o => { })
+                    .AddPolicyScheme(defaultSchema, defaultSchema, options =>
+                    {
+                        // runs on each request
+                        options.ForwardDefaultSelector = context =>
+                        {
+                            // filter by auth type
+                            string authorization = context.Request.Headers[HeaderNames.Authorization];
+                            if (!string.IsNullOrEmpty(authorization) && authorization.StartsWith(AuthSchema.AZURE_AD, StringComparison.OrdinalIgnoreCase))
+                                return AuthSchema.AZURE_AD;
 
-            services.AddAuthorization(options =>
-            {
-                options.DefaultPolicy = new AuthorizationPolicyBuilder()
-                  .AddAuthenticationSchemes(defaultSchema)
-                  .RequireAuthenticatedUser()
-                  .Build();
-
-                options.AddPolicy(AuthSchema.BEARER, builder =>
-                {
-                    builder.AddAuthenticationSchemes(AuthSchema.BEARER);
-                    builder.RequireAuthenticatedUser();
-                    builder.Build();
-                });
-
-                options.AddPolicy(AuthSchema.AZURE_AD, builder =>
-                {
-                    builder.AddAuthenticationSchemes(AuthSchema.AZURE_AD);
-                    builder.RequireAuthenticatedUser();
-                    builder.Build();
-                });
-            });
+                            // otherwise always check for Bearer (Guardian) auth
+                            return AuthSchema.BEARER;
+                        };
+                    });
         }
     }
 }

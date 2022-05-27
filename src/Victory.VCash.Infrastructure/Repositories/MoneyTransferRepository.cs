@@ -43,7 +43,7 @@ namespace Victory.VCash.Infrastructure.Repositories
 
         public MoneyTransfer GetMoneyTransfer(long moneyTransferId)
         {
-            var sql = $@"SELECT money_transfer_id, from_user_id, to_user_id, amount, money_transfer_status_id, error, created_by_user_id, modified_by_user_id, insert_date
+            var sql = $@"SELECT money_transfer_id, from_user_id, to_user_id, amount, money_transfer_status_id, error, created_by, modified_by, insert_date
                          FROM money_transfer
                          WHERE money_transfer_id = {moneyTransferId}";
 
@@ -57,7 +57,8 @@ namespace Victory.VCash.Infrastructure.Repositories
                    .ForMember(d => d.Amount, opt => opt.MapFrom(src => src["amount"]))
                    .ForMember(d => d.MoneyTransferStatusId, opt => opt.MapFrom(src => src["money_transfer_status_id"]))
                    .ForMember(d => d.Error, opt => opt.MapFrom(src => src["error"]))
-                   .ForMember(d => d.CreatedByUserId, opt => opt.MapFrom(src => src["created_by_user_id"]))
+                   .ForMember(d => d.CreatedBy, opt => opt.MapFrom(src => src["created_by"]))
+                   .ForMember(d => d.ModifiedBy, opt => opt.MapFrom(src => src["modify_by"]))
                    .ForMember(d => d.InsertDate, opt => opt.MapFrom(src => src["insert_date"]));
             }).CreateMapper();
 
@@ -70,6 +71,9 @@ namespace Victory.VCash.Infrastructure.Repositories
 
         public MoneyTransfer SaveMoneyTransfer(MoneyTransfer moneyTransfer)
         {
+            var s_createdBy = !string.IsNullOrEmpty(moneyTransfer.CreatedBy)? $"'{ moneyTransfer.CreatedBy }'" : "null";
+            var s_modifiedBy = !string.IsNullOrEmpty(moneyTransfer.ModifiedBy) ? $"'{ moneyTransfer.ModifiedBy }'" : "null";
+
             var sql = $@"DO $$
                          DECLARE
                              _money_transfer_id BIGINT := {moneyTransfer.MoneyTransferId};
@@ -79,8 +83,8 @@ namespace Victory.VCash.Infrastructure.Repositories
                              _money_transfer_status_id INT := {(int)moneyTransfer.MoneyTransferStatusId};
                              _error TEXT := '{moneyTransfer.Error}';
                              _note TEXT := '{moneyTransfer.Note}';
-                             _created_by_user_id INT := {moneyTransfer.CreatedByUserId};
-                             _modified_by_user_id INT := {moneyTransfer.MoneyTransferId};
+                             _created_by UUID := {s_createdBy};
+                             _modified_by UUID := {s_modifiedBy};
                              _now TIMESTAMP := NOW() AT time zone 'utc';
                          BEGIN 
 	                         IF EXISTS(SELECT 'x' FROM money_transfer WHERE money_transfer_id = _money_transfer_id) THEN
@@ -90,13 +94,13 @@ namespace Victory.VCash.Infrastructure.Repositories
 									                      money_transfer_status_id = _money_transfer_status_id, 
                                                           error = _error,
                                                           note = _note,
-									                      created_by_user_id = _created_by_user_id, 
-									                      modified_by_user_id = _modified_by_user_id, 
+									                      created_by = _created_by, 
+									                      modified_by = _modified_by, 
 									                      update_date = _now
 		                        WHERE money_transfer_id = _money_transfer_id;
 	                         ELSE
-		                        INSERT INTO money_transfer(from_user_id, to_user_id, amount, money_transfer_status_id, error, note, created_by_user_id, modified_by_user_id, insert_date, update_date) 
-		                        VALUES (_from_user_id, _to_user_id, _amount, _money_transfer_status_id, _error, _note, _created_by_user_id, _modified_by_user_id, _now, NULL);
+		                        INSERT INTO money_transfer(from_user_id, to_user_id, amount, money_transfer_status_id, error, note, created_by, modified_by, insert_date, update_date) 
+		                        VALUES (_from_user_id, _to_user_id, _amount, _money_transfer_status_id, _error, _note, _created_by, _modified_by, _now, NULL);
 		                        
                                 _money_transfer_id := currval(pg_get_serial_sequence('money_transfer','money_transfer_id'));
 	                         END IF;
@@ -123,8 +127,8 @@ namespace Victory.VCash.Infrastructure.Repositories
                    .ForMember(d => d.MoneyTransferStatusId, opt => opt.MapFrom(src => src["money_transfer_status_id"]))
                    .ForMember(d => d.Error, opt => opt.MapFrom(src => src["error"]))
                    .ForMember(d => d.Note, opt => opt.MapFrom(src => src["note"]))
-                   .ForMember(d => d.CreatedByUserId, opt => opt.MapFrom(src => src["created_by_user_id"]))
-                   .ForMember(d => d.ModifiedByUserId, opt => opt.MapFrom(src => src["modified_by_user_id"]))
+                   .ForMember(d => d.CreatedBy, opt => opt.MapFrom(src => src["created_by"]))
+                   .ForMember(d => d.ModifiedBy, opt => opt.MapFrom(src => src["modified_by"]))
                    .ForMember(d => d.InsertDate, opt => opt.MapFrom(src => src["insert_date"]));
             }).CreateMapper();
 
@@ -224,7 +228,7 @@ namespace Victory.VCash.Infrastructure.Repositories
             string s_dateTo = (dateTo != null) ? $"'{dateTo.Value.ToString("yyyy-MM-dd HH:mm")}'" : "null";
             string s_status = (status != null) ? $"{(int)status}" : "null";
 
-            var sql = $@"SELECT m.money_transfer_id, m.from_user_id, m.to_user_id, m.amount, m.money_transfer_status_id, m.error, m.created_by_user_id, m.modified_by_user_id, m.insert_date, m.update_date
+            var sql = $@"SELECT m.money_transfer_id, m.from_user_id, m.to_user_id, m.amount, m.money_transfer_status_id, m.error, m.created_by, m.modified_by, m.insert_date, m.update_date
                          FROM money_transfer m
                          WHERE m.money_transfer_id = COALESCE({s_moneyTransferId}, m.money_transfer_id)
                            AND m.from_user_Id = COALESCE({s_fromUserId}, m.from_user_Id)
@@ -244,8 +248,8 @@ namespace Victory.VCash.Infrastructure.Repositories
                    .ForMember(d => d.Amount, opt => opt.MapFrom(src => src["amount"]))
                    .ForMember(d => d.MoneyTransferStatusId, opt => opt.MapFrom(src => src["money_transfer_status_id"]))
                    .ForMember(d => d.Error, opt => opt.MapFrom(src => src["error"]))
-                   .ForMember(d => d.CreatedByUserId, opt => opt.MapFrom(src => src["created_by_user_id"]))
-                   .ForMember(d => d.ModifiedByUserId, opt => opt.MapFrom(src => src["modified_by_user_id"]))
+                   .ForMember(d => d.CreatedBy, opt => opt.MapFrom(src => src["created_by"]))
+                   .ForMember(d => d.ModifiedBy, opt => opt.MapFrom(src => src["modified_by"]))
                    .ForMember(d => d.InsertDate, opt => opt.MapFrom(src => src["insert_date"]))
                    .ForMember(d => d.UpdateDate, opt => opt.MapFrom(src => src["update_date"]));
             }).CreateMapper();

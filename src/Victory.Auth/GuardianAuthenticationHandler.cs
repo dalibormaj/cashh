@@ -3,6 +3,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.Net.Http.Headers;
 using System.Collections.Generic;
+using System.Linq;
 using System.Security.Claims;
 using System.Text.Encodings.Web;
 using System.Threading.Tasks;
@@ -31,10 +32,10 @@ namespace Victory.Auth
 
             var authHeaderValue = Request.Headers[HeaderNames.Authorization].ToString();
 
-            if(!authHeaderValue.StartsWith("Bearer"))
-                return AuthenticateResult.Fail($"Bearer token missing. Check if Authorization header starts with the Bearer key");
+            if(!authHeaderValue.StartsWith(AuthSchema.BEARER))
+                return AuthenticateResult.Fail($"{AuthSchema.BEARER} token missing. Check if Authorization header starts with the {AuthSchema.BEARER} key");
 
-            var token = authHeaderValue.Substring("Bearer".Length).Trim();
+            var token = authHeaderValue.Substring(AuthSchema.BEARER.Length).Trim();
             var validateResponse = await _guardianClient.ValidateTokenAsync(token);
             var isValid = validateResponse?.IsValidated ?? false;
 
@@ -43,8 +44,11 @@ namespace Victory.Auth
                 return AuthenticateResult.Fail($"Access denied");
             }
 
-            var claims = GenerateClaims(validateResponse, token);
-            var identity = new ClaimsIdentity(claims, nameof(GuardianAuthenticationHandler));
+            var claims = Context.User.Claims?.ToList() ?? new List<Claim>(); //current claims. It should be empty in most cases
+            var newClaims = GenerateClaims(validateResponse, token);
+            claims.AddRange(newClaims);
+            var identity = new ClaimsIdentity(claims, AuthSchema.BEARER);
+
             var ticket = new AuthenticationTicket(new ClaimsPrincipal(identity), AuthSchema.BEARER);
 
             return AuthenticateResult.Success(ticket);

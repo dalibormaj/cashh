@@ -8,11 +8,13 @@ using Victory.Auth;
 using Victory.VCash.Api.Controllers.Dtos;
 using Victory.VCash.Api.Controllers.Dtos.Requests;
 using Victory.VCash.Api.Controllers.Dtos.Responses;
+using Victory.VCash.Api.Extensions;
 using Victory.VCash.Application.Services.MoneyTransferService;
 
 namespace Victory.VCash.Api.Controllers
 {
     [Route("money-transfer")]
+    [Authorize(AuthenticationSchemes = AuthSchema.BEARER)]
     public class MoneyTransferController : BaseController
     {
         private readonly IMoneyTransferService _moneyTransferService;   
@@ -23,12 +25,15 @@ namespace Victory.VCash.Api.Controllers
 
         [HttpPost]
         [Route("deposit")]
-        [Authorize]
         public async Task<CreateMoneyTransferResponse> DepositAsync(DepositRequest request)
         {
             GlobalValidator.Validate(request);
-            var agentId = HttpContext.User.GetUserId() ?? throw new ArgumentException("AgentId not found");
-            var moneyTransfer = await _moneyTransferService.CreateAsync(agentId, request.ToUserId, request.Amount);
+            //HttpContext.Current().ValidateCashier();
+
+            var fromUserId = HttpContext.Current().Agent.UserId.Value;
+            var cashierId = HttpContext.Current().Cashier?.CashierId;
+
+            var moneyTransfer = await _moneyTransferService.CreateAsync(fromUserId, request.ToUserId, request.Amount, cashierId);
 
             return new CreateMoneyTransferResponse()
             {
@@ -38,13 +43,15 @@ namespace Victory.VCash.Api.Controllers
 
         [HttpPost]
         [Route("payout")]
-        [Authorize]
         public async Task<CreateMoneyTransferResponse> PayoutAsync(PayoutRequest request)
         {
             GlobalValidator.Validate(request);
-            var agentId = HttpContext.User.GetUserId() ?? throw new ArgumentException("AgentId not found");
+            //HttpContext.Current().ValidateCashier();
 
-            var moneyTransfer = await _moneyTransferService.CreateAsync(request.FromUserId, agentId, request.Amount);
+            var toUserId = HttpContext.Current().Agent.UserId.Value;
+            var cashierId = HttpContext.Current().Cashier?.CashierId;
+
+            var moneyTransfer = await _moneyTransferService.CreateAsync(request.FromUserId, toUserId, request.Amount, cashierId);
 
             return new CreateMoneyTransferResponse()
             {
@@ -54,7 +61,6 @@ namespace Victory.VCash.Api.Controllers
 
         [HttpPost]
         [Route("refund/{moneyTransferId}")]
-        [Authorize]
         public async Task<CreateMoneyTransferResponse> RefundAsync(int moneyTransferId)
         {
             var moneyTransfer = await _moneyTransferService.RefundAsync(moneyTransferId);
@@ -66,7 +72,6 @@ namespace Victory.VCash.Api.Controllers
 
         [HttpGet]
         [Route("")]
-        [Authorize]
         public GetMoneyTransfersResponse GetMoneyTransfers([FromQuery] GetMoneyTransferFilterRequest filter)
         {
             GlobalValidator.Validate(filter);

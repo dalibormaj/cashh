@@ -2,7 +2,7 @@
 using System.ComponentModel;
 using Victory.VCash.Infrastructure.Resources;
 
-namespace Victory.VCash.Infrastructure.Extensions
+namespace Victory.VCash.Infrastructure.Common
 {
     public static class DescriptionAttributeExtensions
     {

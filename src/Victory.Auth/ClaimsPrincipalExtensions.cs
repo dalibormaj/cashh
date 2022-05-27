@@ -39,5 +39,23 @@ namespace Victory.Auth
 
             return name;
         }
+
+        public static DateTime? GetTokenExpiryDate(this ClaimsPrincipal user)
+        {
+            string exp = user.Claims?.ToList().SingleOrDefault(x => "exp".Equals(x.Type, StringComparison.OrdinalIgnoreCase))?.Value;
+            if (string.IsNullOrEmpty(exp))
+                return null;
+
+            return DateTimeOffset.FromUnixTimeSeconds(Convert.ToInt32(exp)).DateTime;
+        }
+
+        public static bool IsAzureAdClaims(this ClaimsPrincipal user)
+        {
+            var userName = user.Claims?.ToList().SingleOrDefault(x => "preferred_username".Equals(x.Type, StringComparison.OrdinalIgnoreCase))?.Value;
+            if (string.IsNullOrEmpty(userName))
+                return false;
+
+            return true;
+        }
     }
 }

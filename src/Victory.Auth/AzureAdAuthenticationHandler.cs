@@ -32,12 +32,12 @@ namespace Victory.Auth
         protected override Task<AuthenticateResult> HandleAuthenticateAsync()
         {
             var authHeaderValue = Request.Headers[HeaderNames.Authorization].ToString();
-            if (!authHeaderValue.StartsWith("Bearer"))
-                return Task.FromResult(AuthenticateResult.Fail($"Bearer token missing. Check if Authorization header starts with the Bearer key"));
+            if (!authHeaderValue.StartsWith(AuthSchema.AZURE_AD))
+                return Task.FromResult(AuthenticateResult.Fail($"{AuthSchema.AZURE_AD} token missing. Check if Authorization header starts with the {AuthSchema.AZURE_AD} key"));
 
             try
             {
-                var token = authHeaderValue.Substring("Bearer".Length).Trim();
+                var token = authHeaderValue.Substring(AuthSchema.AZURE_AD.Length).Trim();
                 var tokenHandler = new JwtSecurityTokenHandler();
                 var claimsPrincipal = tokenHandler.ValidateToken(token, new TokenValidationParameters
                 {

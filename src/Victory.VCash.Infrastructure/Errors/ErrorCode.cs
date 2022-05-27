@@ -20,6 +20,8 @@ namespace Victory.VCash.Infrastructure.Errors
         INSUFFICIENT_FUNDS,
         [Description("User does not belong to the network")]
         USER_DOES_NOT_BELONG_TO_THE_NETWORK,
+        [Description("Cashier is not in the agent network")]
+        CASHIER_IS_NOT_IN_THE_AGENT_NETWORK,
         [Description("User does not exist")]
         USER_DOES_NOT_EXIST,
         [Description("Agent does not exist")]
@@ -37,6 +39,8 @@ namespace Victory.VCash.Infrastructure.Errors
         [Description("Money transfer cannot be processed {0}")]
         MONEY_TRANSFER_CANNOT_BE_PROCESSED,
         [Description("Password reset cannot complete")]
-        PASSWORD_RESET_CANNOT_COMPLETE
+        PASSWORD_RESET_CANNOT_COMPLETE,
+        [Description("Cashier does not exist")]
+        CASHIER_DOES_NOT_EXIST
     }
 }

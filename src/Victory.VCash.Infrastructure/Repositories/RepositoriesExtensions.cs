@@ -33,7 +33,7 @@ namespace Victory.VCash.Infrastructure.Repositories
             redisOptions.CommandMap = CommandMap.Create(new HashSet<string> { "SUBSCRIBE" }, false);//disables creating additional (pub/sub) connection
 
             services.AddSingleton<ICacheContext>(x => new CacheContext(redisOptions));
-            services.AddTransient<IDataContext>(x => new DataContext<NpgsqlConnection>(dbSettings.ConnectionStrings.Postgres.VictoryNetwork));
+            services.AddTransient<IDataContext>(x => new DataContext<NpgsqlConnection>(dbSettings.ConnectionStrings.Postgres.VCash));
             services.AddTransient<IUnitOfWork, DefaultUnitOfWork>();
 
         }

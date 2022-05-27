@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Victory.VCash.Infrastructure.Common;
 using Victory.VCash.Infrastructure.Extensions;
 using Victory.VCash.Infrastructure.Resources;
 
