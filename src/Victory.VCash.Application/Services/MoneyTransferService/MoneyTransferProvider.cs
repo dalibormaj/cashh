@@ -152,7 +152,7 @@ namespace Victory.VCash.Application.Services.MoneyTransferService
                             var result = await _internalApiClient.CreateTransactionAsync(new CreateTransactionRequest()
                             {
                                 UserId = transaction.UserId.ToString(),
-                                Amount = Math.Abs(transaction.Amount),
+                                Amount = Math.Abs(transaction.Amount.Value),
                                 CapToBalance = false,
                                 GroupIdentifier = groupIdentifier,
                                 TxTypeId = transaction.ExternalTransactionTypeId.Value

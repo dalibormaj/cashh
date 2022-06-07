@@ -12,9 +12,9 @@ namespace Victory.VCash.Domain.Models
         public long? ExternalTransactionId { get; set; }
         public int? ExternalTransactionTypeId { get; set; }
         public long? ExternalGroupIdentifier { get; set; }
-        public int UserId { get; set; } 
-        public decimal Amount { get; set; } 
-        public long MoneyTransferId { get; set; }
+        public int? UserId { get; set; } 
+        public decimal? Amount { get; set; } 
+        public long? MoneyTransferId { get; set; }
         public DateTime? InsertDate { get; set; }
     }
 }

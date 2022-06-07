@@ -21,7 +21,7 @@ namespace Victory.VCash.Application.Services.MoneyTransferService
             {
                 "UserDoesNotHaveEnoughBalance" => new Error(ErrorCode.INSUFFICIENT_FUNDS),
                 "UserAccountWasNotFound" => new Error(ErrorCode.USER_ACCOUNT_NOT_EXIST),
-                _ => new Error(ErrorCode.BAD_REQUEST, errorMessage)
+                _ => new Error(ErrorCode.SYSTEM_ERROR, errorMessage)
             });
             return errors;
         }

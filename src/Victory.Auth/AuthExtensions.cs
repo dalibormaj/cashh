@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authorization.Infrastructure;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Protocols;
@@ -21,7 +22,7 @@ namespace Victory.Auth
             return settings;
         }
 
-        public static void AddVictoryAuth(this IServiceCollection services, IConfiguration configuration)
+        public static void AddVictoryAuth(this IServiceCollection services, IConfiguration configuration, string defaultScheme = AuthScheme.GUARDIAN)
         {
             var settings = configuration.GetAuthSettings();
 
@@ -37,24 +38,26 @@ namespace Victory.Auth
             OpenIdConnectConfiguration config = configManager.GetConfigurationAsync().Result;
             services.AddSingleton(config);
 
-            var defaultSchema = $"{AuthSchema.BEARER},{AuthSchema.AZURE_AD}";
-            services.AddAuthentication(defaultSchema)
-                    .AddScheme<AuthenticationSchemeOptions, GuardianAuthenticationHandler>(AuthSchema.BEARER, AuthSchema.BEARER, o => { })
-                    .AddScheme<AuthenticationSchemeOptions, AzureAdAuthenticationHandler>(AuthSchema.AZURE_AD, AuthSchema.AZURE_AD, o => { })
-                    .AddPolicyScheme(defaultSchema, defaultSchema, options =>
-                    {
-                        // runs on each request
-                        options.ForwardDefaultSelector = context =>
-                        {
-                            // filter by auth type
-                            string authorization = context.Request.Headers[HeaderNames.Authorization];
-                            if (!string.IsNullOrEmpty(authorization) && authorization.StartsWith(AuthSchema.AZURE_AD, StringComparison.OrdinalIgnoreCase))
-                                return AuthSchema.AZURE_AD;
+            //vcash
+            services.AddSingleton(settings.VCash);
+            services.AddHttpClient<IVCashAuthClient, VCashAuthClient>(config =>
+            {
+                config.BaseAddress = new Uri(settings.VCash.Url);
+            });
 
-                            // otherwise always check for Bearer (Guardian) auth
-                            return AuthSchema.BEARER;
-                        };
-                    });
+            
+            //services.AddAuthorization(x =>
+            //{
+            //    x.DefaultPolicy = new AuthorizationPolicyBuilder().AddAuthenticationSchemes(defaultScheme)
+            //                                                      .RequireAuthenticatedUser()
+            //                                                      .Build();
+            //});
+            
+            services.AddAuthentication()
+                    .AddScheme<AuthenticationSchemeOptions, GuardianAuthenticationHandler>(AuthScheme.GUARDIAN, o => { })
+                    .AddScheme<AuthenticationSchemeOptions, AzureAdAuthenticationHandler>(AuthScheme.AZURE_AD, o => { })
+                    .AddScheme<AuthenticationSchemeOptions, VCashDeviceAuthenticationHandler>(AuthScheme.VCASH_DEVICE, o => { })
+                    .AddScheme<AuthenticationSchemeOptions, VCashCashierAuthenticationHandler>(AuthScheme.VCASH_CASHIER, o => { });
         }
     }
 }

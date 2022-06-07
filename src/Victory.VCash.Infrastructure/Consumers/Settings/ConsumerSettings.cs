@@ -2,7 +2,7 @@
 { 
     public class ConsumerSettings
     {
-        public bool Enable { get; set; }
+        public bool Enabled { get; set; }
         public RabbitMqSection RabbitMq { get; set; }
     }
 

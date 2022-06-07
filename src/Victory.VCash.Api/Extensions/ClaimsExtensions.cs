@@ -15,33 +15,36 @@ namespace Victory.VCash.Api.Extensions
     {
         public static Current Current(this HttpContext context)
         {
-            CurrentAgent agent = null;
+            CurrentDevice agent = null;
             CurrentCashier cashier = null;
             CurrentAdmin admin = null;
 
-            var agentId = context.User.Claims?.ToList().SingleOrDefault(x => "agent_id".Equals(x.Type, StringComparison.OrdinalIgnoreCase))?.Value;
-            if (!string.IsNullOrEmpty(agentId))
+            var claims = context.User.Claims;
+
+            var deviceId = claims.GetClaim("device_id");
+            var deviceName = claims.GetClaim("device_name");
+            var agentId = claims.GetClaim("agent_id");
+            var agentUserId = claims.GetClaim("agent_user_id");
+            var cashierId = claims.GetClaim("cashier_id");
+            var cashierUserName = claims.GetClaim("cashier_user_name");
+
+            if (!string.IsNullOrEmpty(deviceId))
             {
-                agent = new CurrentAgent()
+                agent = new CurrentDevice()
                 {
+                    DeviceId = Convert.ToInt32(deviceId),
+                    DeviceName = deviceName,
                     AgentId = agentId,
-                    UserId = context.User.GetUserId().Value,
-                    UserName = context.User.GetUserName()
+                    AgentUserId = Convert.ToInt32(agentUserId)
                 };
             }
 
-            var cashierUserName = context.User.Claims?.ToList().SingleOrDefault(x => "cashier_user_name".Equals(x.Type, StringComparison.OrdinalIgnoreCase))?.Value;
-            var cashierId = context.User.Claims?.ToList().SingleOrDefault(x => "cashier_id".Equals(x.Type, StringComparison.OrdinalIgnoreCase))?.Value;
-            var parentAgentId = context.User.Claims?.ToList().SingleOrDefault(x => "cashier_parent_agent_id".Equals(x.Type, StringComparison.OrdinalIgnoreCase))?.Value;
-            var parentAgentUserId = context.User.Claims?.ToList().SingleOrDefault(x => "cashier_parent_agent_user_id".Equals(x.Type, StringComparison.OrdinalIgnoreCase))?.Value;
-            if (!string.IsNullOrEmpty(cashierUserName))
+            if (!string.IsNullOrEmpty(cashierId))
             {
                 cashier = new CurrentCashier()
                 {
                     CashierId = cashierId,
-                    UserName = cashierUserName,
-                    ParentAgentId = parentAgentId,
-                    ParentAgentUserId = string.IsNullOrEmpty(parentAgentUserId)? null : Convert.ToInt32(parentAgentUserId)
+                    UserName = cashierUserName
                 };
             }
 
@@ -57,7 +60,7 @@ namespace Victory.VCash.Api.Extensions
             return new Current()
             {
                 Cashier = cashier,
-                Agent = agent,
+                Device = agent,
                 Admin = admin
             };
         }
@@ -66,39 +69,22 @@ namespace Victory.VCash.Api.Extensions
     internal class Current
     {
         public CurrentCashier Cashier { get; init; }
-        public CurrentAgent Agent { get; init; }
+        public CurrentDevice Device { get; init; }
         public CurrentAdmin Admin { get; init; }
-
-        public void ValidateCashier()
-        {
-            if(Cashier == null)
-                throw new VCashBadRequestException(ErrorCode.BAD_REQUEST, "Missing X-CASHIER header value");
-
-            if (Agent == null)
-                throw new VCashBadRequestException(ErrorCode.BAD_REQUEST, "Missing Authorization header value");
-
-            if (Cashier?.ParentAgentUserId != null &&
-               Agent?.UserId != null &&
-               Cashier.ParentAgentUserId != Agent.UserId)
-            {
-                throw new VCashException(ErrorCode.CASHIER_IS_NOT_IN_THE_AGENT_NETWORK);
-            }
-        }
     }
 
     internal class CurrentCashier
     {
         public string CashierId { get; init; }
-        public string ParentAgentId { get; init; }
-        public int? ParentAgentUserId { get; init; }
         public string UserName { get; init; }
     }
 
-    internal class CurrentAgent
+    internal class CurrentDevice
     {
+        public int DeviceId { get; init; }
+        public string DeviceName { get; init; }
         public string AgentId { get; init; }
-        public int? UserId { get; init; }
-        public string UserName { get; init; }
+        public int AgentUserId { get; init; }
     }
 
     internal class CurrentAdmin

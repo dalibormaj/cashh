@@ -11,7 +11,7 @@ namespace Victory.VCash.Infrastructure.Errors
     {
         public List<Error> Errors { get; private set; }
 
-        public BaseException(List<Error> errors) : base(string.Join("; ", errors?.Select(x => string.Format(x.ErrorCode.GetDescription(tryTranslate: true), x.Args))))
+        public BaseException(List<Error> errors) : base(string.Join("; ", errors?.Select(x => string.Format(x.ErrorCode.GetDescription(tryTranslate: true), x.Args ))))
         {
             Errors = errors;
         }
@@ -37,7 +37,10 @@ namespace Victory.VCash.Infrastructure.Errors
         public Error(ErrorCode errorCode, params string[] args)
         {
             //try translating args
-            args = args.ToList().Select(x => ResourceManager.GetText(x)).ToArray();
+            args = args?.ToList().Select(x => ResourceManager.GetText(x)).ToArray();
+
+            if(args.Length == 0)
+                args = new string[] { string.Empty };//default values needed for string.Format
 
             ErrorCode = errorCode;
             Args = args;

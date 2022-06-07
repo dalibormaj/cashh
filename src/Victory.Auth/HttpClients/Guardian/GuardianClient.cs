@@ -4,7 +4,7 @@ using System.Net.Http;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
-using Victory.Auth.HttpClients.Guardian.Models;
+using Victory.Auth.HttpClients.Guardian.Dtos;
 
 namespace Victory.Auth.HttpClients.Guardian
 {
@@ -36,7 +36,7 @@ namespace Victory.Auth.HttpClients.Guardian
             }
             catch (Exception ex)
             {
-                throw new InvalidOperationException("Auth token validation failed", ex);
+                throw new InvalidOperationException("Guardian token authorization failed", ex);
             };
         }
     }

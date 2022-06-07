@@ -10,8 +10,7 @@ namespace Victory.VCash.Application.Services.CashierService
     public interface ICashierService
     {
         Cashier GetCashierByUserName(string userName);
-        Cashier Register(string parentAgentId, int shopId, string userName, string name, string lastName);
-        string CreateAccessToken(string parentAgentId, string userName, string pin);
-        AccessTokenValidationResult ValidateAccessToken(string accessToken);
+        Cashier Register(string parentAgentId, int venueId, string userName, string name, string lastName);
+        Cashier Deregister(string cashierId);
     }
 }

@@ -10,7 +10,8 @@ using System;
 using System.Reflection;
 using Victory.Auth;
 using Victory.VCash.Api.Controllers;
-using Victory.VCash.Api.Controllers.Dtos.Requests;
+using Victory.VCash.Api.Controllers.CashierApp;
+using Victory.VCash.Api.Controllers.CashierApp.Dtos.Requests;
 using Victory.VCash.Api.Mappers;
 using Victory.VCash.Infrastructure.Common;
 
@@ -20,6 +21,7 @@ namespace Victory.VCash.Api.Extensions
     {
         private static void AddSwagger(this IServiceCollection services)
         {
+            const string BEARER = "Bearer";
             var serviceProvider = services.BuildServiceProvider();
             var groupProvider = serviceProvider.GetRequiredService<IApiDescriptionGroupCollectionProvider>();
 
@@ -32,31 +34,15 @@ namespace Victory.VCash.Api.Extensions
                     document.Title = Assembly.GetExecutingAssembly().GetName().Name;
                     document.ApiGroupNames = new[] { group.GroupName };
 
-                    if (group.GroupName.Equals(ControllerGroupName.APP, StringComparison.OrdinalIgnoreCase))
+                    document.AddSecurity(BEARER, new OpenApiSecurityScheme
                     {
-                        document.AddSecurity(AuthSchema.BEARER, new OpenApiSecurityScheme
-                        {
-                            Description = @"Guardian - Authorization header using the Bearer scheme. Enter your token in the text input below.
-                                            Example: 'Bearer kJ8aCbzuMRezSblLVmQlMSZB1ajPS5PtT23hS8QIuqBpYphHx4izc'",
-                            Name = HeaderNames.Authorization,
-                            In = OpenApiSecurityApiKeyLocation.Header,
-                            Type = OpenApiSecuritySchemeType.Http,
-                            Scheme = AuthSchema.BEARER
-                        });
-                    }
-
-                    if (group.GroupName.Equals(ControllerGroupName.ADMIN, StringComparison.OrdinalIgnoreCase))
-                    {
-                        document.AddSecurity(AuthSchema.AZURE_AD, new OpenApiSecurityScheme
-                        {
-                            Description = @"AzureAd - Authorization header using the AzureAd scheme. Enter your token in the text input below.
-                                            Example: 'AzureAd kJ8aCbzuMRezSblLVmQlMSZB1ajPS5PtT23hS8QIuqBpYphHx4izc'",
-                            Name = HeaderNames.Authorization,
-                            In = OpenApiSecurityApiKeyLocation.Header,
-                            Type = OpenApiSecuritySchemeType.ApiKey,
-                            Scheme = AuthSchema.AZURE_AD
-                        });
-                    }                   
+                        Description = @"Guardian - Authorization header using the Bearer scheme. Enter your token in the text input below.
+                                        Example: 'Bearer kJ8aCbzuMRezSblLVmQlMSZB1ajPS5PtT23hS8QIuqBpYphHx4izc'",
+                        Name = HeaderNames.Authorization,
+                        In = OpenApiSecurityApiKeyLocation.Header,
+                        Type = OpenApiSecuritySchemeType.Http,
+                        Scheme = BEARER
+                    });      
                 });
             }
         }
@@ -65,7 +51,9 @@ namespace Victory.VCash.Api.Extensions
         {
             var mapperConfig = new MapperConfiguration(mc =>
             {
-                mc.AddProfile(new UserControllerProfile());
+                mc.AddProfile<AuthMapperProfile>();
+                mc.AddProfile<CashierMapperProfile>();
+                mc.AddProfile<SalesMapperProfile>();
             });
 
             IMapper mapper = mapperConfig.CreateMapper();

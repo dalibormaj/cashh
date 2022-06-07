@@ -10,7 +10,7 @@ namespace Victory.VCash.Domain.Models
     {
         public string CashierId { get; init; }
         public string ParentAgentId { get; set; }
-        public int ShopId { get; set; }
+        public int? VenueId { get; set; }
         public string UserName { get; set; }
         public string Name { get; set; }
         public string LastName { get; set; }

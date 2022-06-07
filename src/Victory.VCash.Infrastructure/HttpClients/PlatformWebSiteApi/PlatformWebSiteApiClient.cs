@@ -41,6 +41,12 @@ namespace Victory.VCash.Infrastructure.HttpClients.PlatformWebSiteApi
             return await response.ConvertToAsync<RegisterUserResponse>();
         }
 
+        //public async Task<RegisterUserResponse> RegisterAgentAsync(RegisterAgentRequest request)
+        //{
+        //    var response = await _httpClient.PostAsync("/api/Security/Registration/RegisterNewUser", request.ToStringContent());
+        //    return await response.ConvertToAsync<RegisterUserResponse>();
+        //}
+
         public async Task<DefaultResponse> RequestPasswordResetAsync(RequestPasswordResetRequest request)
         {
             var response = await _httpClient.PostAsync("/api/Security/Accounts/RequestPasswordReset", request.ToStringContent());

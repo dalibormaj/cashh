@@ -9,11 +9,11 @@ namespace Victory.VCash.Domain.Models
 {
     public class MoneyTransfer
     {
-        public long MoneyTransferId { get; init; }
-        public int FromUserId { get; set; }
-        public int ToUserId { get; set; }   
-        public decimal Amount { get; set; }
-        public MoneyTransferStatus MoneyTransferStatusId { get; set; }
+        public long? MoneyTransferId { get; init; }
+        public int? FromUserId { get; set; }
+        public int? ToUserId { get; set; }   
+        public decimal? Amount { get; set; }
+        public MoneyTransferStatus? MoneyTransferStatusId { get; set; }
         public string Error { get; set; }
         public string Note { get; set; }
         public string CreatedBy { get; set; }
@@ -21,6 +21,5 @@ namespace Victory.VCash.Domain.Models
         public DateTime? InsertDate { get; set; }
         public DateTime? UpdateDate { get; set; }
         public List<Transaction> Transactions { get; set; }
-
     }
 }

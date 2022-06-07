@@ -71,16 +71,18 @@ namespace Victory.VCash.Infrastructure.Repositories
 
         public MoneyTransfer SaveMoneyTransfer(MoneyTransfer moneyTransfer)
         {
+            var s_money_transfer_id = moneyTransfer?.MoneyTransferId?.ToString() ?? "null";
+            var s_moneyTransferStatusId = ((int?)moneyTransfer.MoneyTransferStatusId)?.ToString() ?? "null";
             var s_createdBy = !string.IsNullOrEmpty(moneyTransfer.CreatedBy)? $"'{ moneyTransfer.CreatedBy }'" : "null";
             var s_modifiedBy = !string.IsNullOrEmpty(moneyTransfer.ModifiedBy) ? $"'{ moneyTransfer.ModifiedBy }'" : "null";
 
             var sql = $@"DO $$
                          DECLARE
-                             _money_transfer_id BIGINT := {moneyTransfer.MoneyTransferId};
+                             _money_transfer_id BIGINT := {s_money_transfer_id};
                              _from_user_id INT := {moneyTransfer.FromUserId};
                              _to_user_id INT := {moneyTransfer.ToUserId};
                              _amount DECIMAL(19,4) := {moneyTransfer.Amount}; 
-                             _money_transfer_status_id INT := {(int)moneyTransfer.MoneyTransferStatusId};
+                             _money_transfer_status_id INT := {s_moneyTransferStatusId};
                              _error TEXT := '{moneyTransfer.Error}';
                              _note TEXT := '{moneyTransfer.Note}';
                              _created_by UUID := {s_createdBy};

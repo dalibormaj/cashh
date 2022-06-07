@@ -4,6 +4,8 @@
     {
         public string EmailVerificationUrl { get; set; }
         public string Email { get; set; }
+        public string UserTypeCode { get; set; }
+        public string Password { get; set; }
         public PhoneContact[] PhoneContacts { get; set; }
         public ExtraRegistrationValues ExtraRegistrationValues { get; set; }
     }

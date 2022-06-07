@@ -11,6 +11,6 @@ namespace Victory.VCash.Infrastructure.Repositories.Abstraction
     {
         Cashier SaveCashier(Cashier cashier);
         Cashier GetCashier(string cashierId);
-        Cashier GetCashier(string cashier_id = "", string parentAgentId = "", string userName = "", int? companyId = null, int? shopId = null);
+        Cashier GetCashier(string cashier_id = "", string parentAgentId = "", string userName = "", int? companyId = null, int? venueId = null);
     }
 }

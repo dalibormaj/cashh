@@ -7,9 +7,14 @@ namespace Victory.Auth
 {
     public static class ClaimsPrincipalExtensions
     {
+        public static string GetClaim(this IEnumerable<Claim> claims, string name, StringComparison stringComparison = StringComparison.OrdinalIgnoreCase)
+        {
+            return claims.SingleOrDefault(x => x.Type.Equals(name, stringComparison))?.Value;
+        }
+
         public static int? GetUserId(this ClaimsPrincipal user)
         {
-            var userId = user.Claims?.ToList().SingleOrDefault(x => "UserId".Equals(x.Type, StringComparison.OrdinalIgnoreCase))?.Value;
+            var userId = user.Claims.GetClaim("UserId");
             if (string.IsNullOrEmpty(userId))
                 return null;
 
@@ -19,11 +24,11 @@ namespace Victory.Auth
         public static string GetUserName(this ClaimsPrincipal user)
         {
             //guardian claims
-            var userName = user.Claims?.ToList().SingleOrDefault(x => "UserName".Equals(x.Type, StringComparison.OrdinalIgnoreCase))?.Value;
+            var userName = user.Claims.GetClaim("UserName");
 
             //try azure ad claims
-            if(string.IsNullOrEmpty(userName))
-                userName = user.Claims?.ToList().SingleOrDefault(x => "preferred_username".Equals(x.Type, StringComparison.OrdinalIgnoreCase))?.Value;
+            if (string.IsNullOrEmpty(userName))
+                userName = user.Claims.GetClaim("preferred_username");
 
             if (string.IsNullOrEmpty(userName))
                 return null;
@@ -33,16 +38,21 @@ namespace Victory.Auth
 
         public static string GetName(this ClaimsPrincipal user)
         {
-            var name = user.Claims?.ToList().SingleOrDefault(x => "name".Equals(x.Type, StringComparison.OrdinalIgnoreCase))?.Value;
-            if (string.IsNullOrEmpty(name))
-                return null;
-
-            return name;
+            return user.Claims.GetClaim("name");
         }
 
-        public static DateTime? GetTokenExpiryDate(this ClaimsPrincipal user)
+        public static DateTime? GetIssuedAt(this ClaimsPrincipal user)
         {
-            string exp = user.Claims?.ToList().SingleOrDefault(x => "exp".Equals(x.Type, StringComparison.OrdinalIgnoreCase))?.Value;
+            string iat = user.Claims.GetClaim("iat");
+            if (string.IsNullOrEmpty(iat))
+                return null;
+
+            return DateTimeOffset.FromUnixTimeSeconds(Convert.ToInt32(iat)).DateTime;
+        }
+
+        public static DateTime? GetExpiresAt(this ClaimsPrincipal user)
+        {
+            string exp = user.Claims.GetClaim("exp");
             if (string.IsNullOrEmpty(exp))
                 return null;
 
@@ -51,7 +61,7 @@ namespace Victory.Auth
 
         public static bool IsAzureAdClaims(this ClaimsPrincipal user)
         {
-            var userName = user.Claims?.ToList().SingleOrDefault(x => "preferred_username".Equals(x.Type, StringComparison.OrdinalIgnoreCase))?.Value;
+            var userName = user.Claims.GetClaim("preferred_username");
             if (string.IsNullOrEmpty(userName))
                 return false;
 

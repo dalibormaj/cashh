@@ -6,7 +6,6 @@ using Victory.VCash.Infrastructure.Common;
 namespace Victory.VCash.Api.Controllers
 {
     [ApiController]
-    [ApiExplorerSettings(GroupName = ControllerGroupName.APP)] //default group
     public abstract class BaseController : Controller
     {
         private IGlobalValidator _globalValidator;
@@ -18,7 +17,9 @@ namespace Victory.VCash.Api.Controllers
 
     public static class ControllerGroupName
     {
-        public const string APP = "app";
-        public const string ADMIN = "admin";
+        public const string CASHIER_APP = "cashier-app";
+        public const string AGENT_APP = "agent-app";
+        public const string SALES_APP = "sales-app";
+        public const string AUTH = "auth";
     }
 }

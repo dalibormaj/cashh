@@ -2,18 +2,24 @@
 {
     public class AuthSettings
     {
-        public GuardianSettings Guardian { get; set; }
-        public AzureAdSettings AzureAd { get; set; }
-
+        public GuardianAuthSettings Guardian { get; set; }
+        public AzureAdAuthSettings AzureAd { get; set; }
+        public VCashAuthSettings VCash { get; set; }
     }
 
-    public class GuardianSettings
+    public class GuardianAuthSettings
     {
         public string Url { get; set; }
     }
 
-    public class AzureAdSettings
+    public class AzureAdAuthSettings
     {
         public string OpenIdConfigUrl { get; set; }
+    }
+
+    public class VCashAuthSettings
+    {
+        public string Url { get; set; }
+        public string CashierTokenKey { get; set; }
     }
 }

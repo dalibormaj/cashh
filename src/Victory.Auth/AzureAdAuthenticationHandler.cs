@@ -22,22 +22,27 @@ namespace Victory.Auth
     public class AzureAdAuthenticationHandler : AuthenticationHandler<AuthenticationSchemeOptions>
     {
         private OpenIdConnectConfiguration _config;
+        private readonly ILogger<AzureAdAuthenticationHandler> _logger;
 
         public AzureAdAuthenticationHandler(IOptionsMonitor<AuthenticationSchemeOptions> options, ILoggerFactory logger, UrlEncoder encoder, ISystemClock clock, OpenIdConnectConfiguration config)
             : base(options, logger, encoder, clock)
         {
             _config = config;
+            _logger = logger.CreateLogger<AzureAdAuthenticationHandler>();
         }
 
         protected override Task<AuthenticateResult> HandleAuthenticateAsync()
         {
+            const string BEARER = JwtBearerDefaults.AuthenticationScheme;
             var authHeaderValue = Request.Headers[HeaderNames.Authorization].ToString();
-            if (!authHeaderValue.StartsWith(AuthSchema.AZURE_AD))
-                return Task.FromResult(AuthenticateResult.Fail($"{AuthSchema.AZURE_AD} token missing. Check if Authorization header starts with the {AuthSchema.AZURE_AD} key"));
+            
+            if (!authHeaderValue.StartsWith(BEARER))
+                return Task.FromResult(AuthenticateResult.Fail($"{BEARER} token missing. Check if Authorization header starts with the {BEARER} key"));
+
+            var token = authHeaderValue.Substring(BEARER.Length).Trim();
 
             try
             {
-                var token = authHeaderValue.Substring(AuthSchema.AZURE_AD.Length).Trim();
                 var tokenHandler = new JwtSecurityTokenHandler();
                 var claimsPrincipal = tokenHandler.ValidateToken(token, new TokenValidationParameters
                 {
@@ -46,14 +51,16 @@ namespace Victory.Auth
                     ValidIssuers = new[] { _config.Issuer }
                 }, out SecurityToken validatedToken);
             
-                var ticket = new AuthenticationTicket(claimsPrincipal, AuthSchema.AZURE_AD);
+                var ticket = new AuthenticationTicket(claimsPrincipal, AuthScheme.AZURE_AD);
                 return Task.FromResult(AuthenticateResult.Success(ticket));
             }
             catch (Exception ex)
             {
-                var reason = string.Empty;
+                var reason = ex.Message;
                 if (ex.Message.StartsWith("IDX10223"))
                     reason = "Token has expired.";
+
+                _logger.LogInformation("{handler} - Access denied for token: {token} - reason {reason}", nameof(AzureAdAuthenticationHandler), token, reason);
                 return Task.FromResult(AuthenticateResult.Fail($"Access denied. {reason}".Trim()));
             }
         }

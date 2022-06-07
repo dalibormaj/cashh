@@ -13,7 +13,7 @@ namespace Victory.VCash.Api.Workers
         {
             var settings = configuration.GetConsumerSettings();
 
-            if (settings.Enable)
+            if (settings.Enabled)
             {
                 //mq consumers
                 services.AddConsumers(configuration);

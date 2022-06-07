@@ -2,6 +2,8 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ApiExplorer;
+using Microsoft.AspNetCore.Mvc.ApplicationModels;
+using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -9,6 +11,7 @@ using NSwag.AspNetCore;
 using System;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using System.Text.RegularExpressions;
 using Victory.VCash.Api.Extensions;
 using Victory.VCash.Api.Middlewares;
 using Victory.VCash.Api.Workers;
@@ -32,12 +35,30 @@ namespace Victory.VCash
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddControllers()
+            services.AddRouting(options =>
+                    {
+                        options.LowercaseUrls = true;
+                        options.LowercaseQueryStrings = true;
+                    })
+                    .AddHttpContextAccessor()
+                    .AddCors(opt =>
+                    {
+                        opt.AddPolicy(name: _corsPolicyName, builder =>
+                        {
+                            builder.AllowAnyOrigin()
+                                   .AllowAnyHeader()
+                                   .AllowAnyMethod();
+                        });
+                    })
+                    .AddControllers(options => 
+                    {
+                        options.Conventions.Add(new RouteTokenTransformerConvention(new SlugifyParameterTransformer()));
+                    })
                     .AddJsonOptions(options =>
                     {
                         options.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
                         options.JsonSerializerOptions.Converters.Add(new DateTimeConverter());
-                        options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());                        
+                        options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
                     })
                     .ConfigureApiBehaviorOptions(x =>
                     {
@@ -47,16 +68,7 @@ namespace Victory.VCash
                             throw new VCashBadRequestException(ErrorCode.BAD_REQUEST, errorMessage);
                         };
                     });
-            services.AddHttpContextAccessor();
-            services.AddCors(opt =>
-            {
-                opt.AddPolicy(name: _corsPolicyName, builder =>
-                {
-                    builder.AllowAnyOrigin()
-                           .AllowAnyHeader()
-                           .AllowAnyMethod();
-                });
-            });
+
             services.AddMvc()
                     .AddDataAnnotationsLocalization(options =>
                     {
@@ -65,7 +77,7 @@ namespace Victory.VCash
 
             //add core logic
             services.AddVictoryApi(Configuration);
-            services.AddVictoryApplication();
+            services.AddVictoryApplication(Configuration);
             services.AddVictoryInfrastructure(Configuration);
 
             //background services
@@ -97,14 +109,14 @@ namespace Victory.VCash
 
             //note: order is important
             app.UseMiddleware<LanguageMiddleware>();
+            app.UseMiddleware<UnauthorizedMiddleware>();
             app.UseMiddleware<ExceptionMiddleware>();
-            app.UseMiddleware<AuthCashierMiddleware>();
 
             app.UseHttpsRedirection();
             app.UseRouting();
+            
             app.UseAuthentication();
             app.UseAuthorization();
-            app.UseMiddleware<AuthAgentMiddleware>(); //note: it's important to execute after auth
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
@@ -128,7 +140,7 @@ namespace Victory.VCash
                 var errors = item.Value.Errors;
                 if ((errors?.Count ?? 0) > 0)
                 {
-                    errorMessage = $"Field '{key}' contains an invalid value";
+                    errorMessage = $"Field '{key}' is missing or contains an invalid value";
                     break;
                 }
             }
@@ -137,6 +149,7 @@ namespace Victory.VCash
         }
     }
     
+    //custom converter for UTC (with Z at the end)
     public class DateTimeConverter : JsonConverter<DateTime>
     {
         public override DateTime Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
@@ -150,4 +163,17 @@ namespace Victory.VCash
             writer.WriteStringValue(value.ToString("yyyy'-'MM'-'dd'T'HH':'mm':'ssZ"));
         }
     }
+
+
+    //Routing rule - add dash between each word in controller name
+    public class SlugifyParameterTransformer : IOutboundParameterTransformer
+    {
+        public string TransformOutbound(object value)
+        {
+            // Slugify value
+            return value == null ? null : Regex.Replace(value.ToString(), "([a-z])([A-Z])", "$1-$2").ToLower();
+        }
+    }
+
+
 }

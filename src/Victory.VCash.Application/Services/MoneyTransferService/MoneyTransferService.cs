@@ -33,9 +33,9 @@ namespace Victory.VCash.Application.Services.MoneyTransferService
             var moneyTransfer = _provider.Create(fromUserId, toUserId, amount, cashierId);
 
             if (moneyTransfer.MoneyTransferStatusId == MoneyTransferStatus.PENDING_APPROVAL) 
-                return await _provider.ProcessAsync(moneyTransfer.MoneyTransferId);
+                return await _provider.ProcessAsync(moneyTransfer.MoneyTransferId.Value);
 
-            return await _provider.ProcessAsync(moneyTransfer.MoneyTransferId, MoneyTransferStatus.COMPLETED);
+            return await _provider.ProcessAsync(moneyTransfer.MoneyTransferId.Value, MoneyTransferStatus.COMPLETED);
         }
         public async Task<MoneyTransfer> RefundAsync(long moneyTransferId)
         {
