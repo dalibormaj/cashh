@@ -107,7 +107,6 @@ namespace Victory.VCash.Application.Services.AgentService
                     input.Company = existingCompany?.ApplyNewValues(input.Company) ?? input.Company;
                     input.Company = repository.SaveCompany(input.Company);
 
-
                     //save venues
                     //append existing values 
                     var existingVenues = repository.GetVenues(input.Company.CompanyId.Value) ?? new List<Venue>();
@@ -118,7 +117,6 @@ namespace Victory.VCash.Application.Services.AgentService
                         venue.CompanyId = venue.CompanyId ?? input.Company.CompanyId;
                         repository.SaveVenue(venue);
                     });
-
 
                     //save bank accounts
                     //append existing values 
@@ -162,7 +160,7 @@ namespace Victory.VCash.Application.Services.AgentService
 
         public async Task<RegisterAgentResult> RegisterMasterAgentAsync(string userName, string email, string firstName, string lastName)
         {
-            var masterCompanyId = 1;//TODO!!! FIX THIS
+            var masterCompanyId = (int)DefaultCompany.VICTORY;
             var repository = _unitOfWork.GetRepository<AgentRepository>();
 
             var masterCompany = repository.GetCompany(masterCompanyId);
