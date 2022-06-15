@@ -13,7 +13,7 @@ namespace Victory.VCash.Application.Services.AuthService.Results
         public bool IsValid { get; set; }
         public int DeviceId { get; set; }
         public string DeviceName { get; set; }  
-        public string AgentId { get; set; }
+        public Guid? AgentId { get; set; }
         public DateTime? IssuedAt { get; set; }
         public DateTime? ExpiresAt { get; set; }
         public List<Claim> Claims { get; set; }

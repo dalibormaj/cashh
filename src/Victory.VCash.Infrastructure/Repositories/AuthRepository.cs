@@ -22,7 +22,7 @@ namespace Victory.VCash.Infrastructure.Repositories
         public Device SaveDevice(Device device)
         {
             var s_deviceId = device.DeviceId?.ToString() ?? "null";
-            var s_agentId = !string.IsNullOrEmpty(device.AgentId) ? $"'{device.AgentId}'" : "null";
+            var s_agentId = device.AgentId != null ? $"'{device.AgentId}'" : "null";
             var s_enabled = device.Enabled?.ToString() ?? "null";
             var s_name = !string.IsNullOrEmpty(device.Name) ? $"'{device.Name}'" : "null";
             var s_deviceCode = !string.IsNullOrEmpty(device.DeviceCode) ? $"'{device.DeviceCode}'" : "null";
@@ -31,6 +31,7 @@ namespace Victory.VCash.Infrastructure.Repositories
             var s_token = !string.IsNullOrEmpty(device.Token) ? $"'{device.Token}'" : "null";
             var s_tokenIssuedAt = device.TokenIssuedAt != null ? $"'{device.TokenIssuedAt?.ToString("yyyy-MM-dd HH:mm:ss.fff")}'" : "null";
             var s_tokenExpiresAt = device.TokenExpiresAt != null ? $"'{device.TokenExpiresAt?.ToString("yyyy-MM-dd HH:mm:ss.fff")}'" : "null";
+            var unixMs = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
 
             var sql = $@"DO $$
                          DECLARE
@@ -64,7 +65,7 @@ namespace Victory.VCash.Infrastructure.Repositories
                              END IF;
                          
                              -- create temp table with affected rows
-                             CREATE TEMPORARY TABLE _tmp{nameof(Device)} ON COMMIT DROP 
+                             CREATE TEMPORARY TABLE _tmp{unixMs} ON COMMIT DROP 
                              AS
                              SELECT * 
                              FROM device 
@@ -73,7 +74,7 @@ namespace Victory.VCash.Infrastructure.Repositories
                          
                          -- result
                          SELECT * 
-                         FROM _tmp{nameof(Device)}";
+                         FROM _tmp{unixMs}";
 
             var mapper = new MapperConfiguration(cfg =>
             {
@@ -114,7 +115,7 @@ namespace Victory.VCash.Infrastructure.Repositories
             return device;
         }
 
-        public List<Device> GetDevices(string agentId, string deviceName = null, string deviceCode = null, string token = null)
+        public List<Device> GetDevices(Guid agentId, string deviceName = null, string deviceCode = null, string token = null)
         {
 
             string s_deviceName = deviceName != null ? $"'{deviceName}'" : "null";

@@ -13,7 +13,7 @@ namespace Victory.Auth.HttpClients.Guardian.Dtos
         public string ValidationError { get; set; }
         [JsonPropertyName("id")]
         public string UserId { get; set; }
-        [JsonPropertyName("userName")]
+        [JsonPropertyName("username")]
         public string UserName { get; set; }
         [JsonPropertyName("roles")]
         public List<string> Roles { get; set; }

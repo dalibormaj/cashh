@@ -38,6 +38,16 @@ namespace Victory.DataAccess
 
         #region Sync Methods
 
+        public IDataReader ExecuteReader(string sql)
+        {
+            var res = _connection.ExecuteReader(sql,
+                transaction: _transaction,
+                commandType: CommandType.Text,
+                commandTimeout: _connection.ConnectionTimeout);
+
+            return res;
+        }
+
         public List<IDictionary<string, object>> ExecuteSql(string sql)
         {
             var res = _connection.Query(sql,

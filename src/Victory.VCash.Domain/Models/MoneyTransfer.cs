@@ -7,7 +7,7 @@ using Victory.VCash.Domain.Enums;
 
 namespace Victory.VCash.Domain.Models
 {
-    public class MoneyTransfer
+    public class MoneyTransfer : BaseDomainModel
     {
         public long? MoneyTransferId { get; init; }
         public int? FromUserId { get; set; }

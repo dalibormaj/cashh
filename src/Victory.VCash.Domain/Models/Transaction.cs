@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Victory.VCash.Domain.Models
 {
-    public class Transaction
+    public class Transaction : BaseDomainModel
     {
         public long? TransactionId { get; set; }
         public long? ExternalTransactionId { get; set; }

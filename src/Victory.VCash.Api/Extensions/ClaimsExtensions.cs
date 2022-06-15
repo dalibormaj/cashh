@@ -1,8 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http;
 using System;
-using System.Linq;
 using Victory.Auth;
-using Victory.VCash.Infrastructure.Errors;
 
 namespace Victory.VCash.Api.Extensions
 {
@@ -15,9 +13,10 @@ namespace Victory.VCash.Api.Extensions
     {
         public static Current Current(this HttpContext context)
         {
-            CurrentDevice agent = null;
+            CurrentDevice device = null;
             CurrentCashier cashier = null;
-            CurrentAdmin admin = null;
+            CurrentAzureAd azureAd = null;
+            CurrentGuardian guardian = null;
 
             var claims = context.User.Claims;
 
@@ -27,14 +26,17 @@ namespace Victory.VCash.Api.Extensions
             var agentUserId = claims.GetClaim("agent_user_id");
             var cashierId = claims.GetClaim("cashier_id");
             var cashierUserName = claims.GetClaim("cashier_user_name");
+            var userId = claims.GetClaim("user_id");
+            var userName = claims.GetClaim("user_name");
+            var guardianToken = claims.GetClaim("guardian_token");
 
             if (!string.IsNullOrEmpty(deviceId))
             {
-                agent = new CurrentDevice()
+                device = new CurrentDevice()
                 {
                     DeviceId = Convert.ToInt32(deviceId),
                     DeviceName = deviceName,
-                    AgentId = agentId,
+                    AgentId = string.IsNullOrEmpty(agentId)? null : new Guid(agentId),
                     AgentUserId = Convert.ToInt32(agentUserId)
                 };
             }
@@ -50,18 +52,32 @@ namespace Victory.VCash.Api.Extensions
 
             if (context.User.IsAzureAdClaims())
             {
-                admin = new CurrentAdmin()
+                azureAd = new CurrentAzureAd()
                 {
                     UserName = context.User.GetUserName(),
                     Name = context.User.GetName()
                 };
             }
 
+            if (context.User.IsGuardianClaims())
+            {
+                int _userId;
+                int.TryParse(userId, out _userId);
+
+                guardian = new CurrentGuardian()
+                {
+                    UserId = _userId,
+                    UserName = userName,
+                    AccessToken = guardianToken
+                };
+            }
+
             return new Current()
             {
                 Cashier = cashier,
-                Device = agent,
-                Admin = admin
+                Device = device,
+                AzureAd = azureAd,
+                Guardian = guardian
             };
         }
     }
@@ -70,7 +86,8 @@ namespace Victory.VCash.Api.Extensions
     {
         public CurrentCashier Cashier { get; init; }
         public CurrentDevice Device { get; init; }
-        public CurrentAdmin Admin { get; init; }
+        public CurrentAzureAd AzureAd { get; init; }
+        public CurrentGuardian Guardian { get; init; }
     }
 
     internal class CurrentCashier
@@ -83,13 +100,20 @@ namespace Victory.VCash.Api.Extensions
     {
         public int DeviceId { get; init; }
         public string DeviceName { get; init; }
-        public string AgentId { get; init; }
+        public Guid? AgentId { get; init; }
         public int AgentUserId { get; init; }
     }
 
-    internal class CurrentAdmin
+    internal class CurrentAzureAd
     {
         public string UserName { get; init; }
         public string Name { get; init; }
+    }
+
+    internal class CurrentGuardian
+    {
+        public int UserId { get; init; }
+        public string UserName { get; init; }
+        public string AccessToken { get; init; }
     }
 }

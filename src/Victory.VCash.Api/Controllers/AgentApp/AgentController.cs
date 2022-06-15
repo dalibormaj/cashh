@@ -1,9 +1,13 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System;
 using System.Threading.Tasks;
+using Victory.Auth;
 using Victory.VCash.Api.Controllers.AgentApp.Dtos.Requests;
 using Victory.VCash.Api.Controllers.AgentApp.Dtos.Responses;
+using Victory.VCash.Api.Extensions;
 using Victory.VCash.Application.Services.AgentService;
+using Victory.VCash.Infrastructure.Errors;
 using Victory.VCash.Infrastructure.Resources;
 
 namespace Victory.VCash.Api.Controllers.AgentApp
@@ -16,6 +20,19 @@ namespace Victory.VCash.Api.Controllers.AgentApp
         {
             _agentService = agentService;
         }
+
+        [HttpPost("override-password")]
+        public async Task<BaseResponse> OverridePassword(_OverridePasswordRequest request)
+        {
+            GlobalValidator.Validate(request);
+            var agentUserId = HttpContext.Current().Guardian.UserId;
+            var guardianToken = HttpContext.Current().Guardian.AccessToken;
+            var agent = _agentService.GetAgent(agentUserId);
+
+            await _agentService.OverridePasswordAsync(agent.AgentId.Value, request.NewPassword, guardianToken);
+            return new BaseResponse();
+        }
+
 
         [HttpPost("request-password-reset")]
         [AllowAnonymous]
@@ -39,14 +56,6 @@ namespace Victory.VCash.Api.Controllers.AgentApp
             {
                 Message = ResourceManager.GetText("Password successfully changed")
             };
-        }
-
-        [HttpGet]
-        [Route("")]
-        [Authorize]
-        public async Task<_RegisterAgentResponse> GetAdmin()
-        {
-            return new _RegisterAgentResponse();
         }
     }
 }

@@ -10,5 +10,7 @@ namespace Victory.VCash.Application.Services.AgentService.Results
     public class RegisterAgentResult
     {
         public Agent Agent { get; set; }
+        public Company Company { get; set; }
+        public List<Venue> Venues { get; set; }
     }
 }

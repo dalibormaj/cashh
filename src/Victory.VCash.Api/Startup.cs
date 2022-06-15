@@ -141,6 +141,9 @@ namespace Victory.VCash
                 if ((errors?.Count ?? 0) > 0)
                 {
                     errorMessage = $"Field '{key}' is missing or contains an invalid value";
+
+                    if (key == "$")
+                        errorMessage = "invalid JSON format";
                     break;
                 }
             }

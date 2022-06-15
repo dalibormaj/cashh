@@ -6,10 +6,10 @@ using System.Threading.Tasks;
 
 namespace Victory.VCash.Domain.Models
 {
-    public class Device
+    public class Device : BaseDomainModel
     {
         public int? DeviceId { get; set; }
-        public string AgentId { get; set; }
+        public Guid? AgentId { get; set; }
         public bool? Enabled { get; set; }
         public string Name { get; set; }
         public string DeviceCode { get; set; }

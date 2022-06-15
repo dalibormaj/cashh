@@ -12,6 +12,8 @@ using Victory.VCash.Api.Extensions;
 using Victory.VCash.Application.Services.AgentService;
 using Victory.VCash.Application.Services.CashierService;
 using Victory.VCash.Infrastructure.Errors;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace Victory.VCash.Api.Controllers.AgentApp
 {
@@ -25,28 +27,65 @@ namespace Victory.VCash.Api.Controllers.AgentApp
             _cashierService = cashierService;
         }
 
-        [HttpGet]
-        [Route("")]
-        public async Task<_RegisterAgentResponse> GetCashier()
-        {
-            //var a = _cashierService.CreateAccessToken("7f9763f2-68be-45c2-bd44-b18a9a2c33db", "testcashier", "11111");
-            //var s = _cashierService.ValidateAccessToken(a);
-            return new _RegisterAgentResponse();
-        }
-
         [HttpPost]
         [Route("register")]
-        public async Task<_RegisterCashierResponse> RegisterCashier(_RegisterCashierRequest request)
+        public _RegisterCashierResponse RegisterCashier(_RegisterCashierRequest request)
         {
-            var agentId = HttpContext.Current().Device?.AgentId;
-            if (agentId == null)
-                throw new VCashException(ErrorCode.AGENT_DOES_NOT_EXIST);
+            var agentUserId = HttpContext.Current().Guardian.UserId;
+            var agent = _agentService.GetAgent(agentUserId);
+            if (agent == null)
+                throw new VCashException(ErrorCode.AGENT_CANNOT_BE_FOUND);
 
-            var cashier = _cashierService.Register(agentId, request.VenueId, request.UserName, request.Name, request.LastName);
+            var cashier = _cashierService.Register(agent.AgentId.Value, request.VenueId, request.UserName, request.FirstName, request.LastName, request.Pin);
             return new _RegisterCashierResponse()
             {
                 CashierId = cashier.CashierId
             };
+        }
+
+
+        [HttpPost]
+        [Route("register-default")]
+        public _RegisterCashierResponse RegisterDefaultCashier(_RegisterDefaultCashierRequest request)
+        {
+            var agentUserId = HttpContext.Current().Guardian.UserId;
+            var agent = _agentService.GetAgent(agentUserId);
+            if (agent == null)
+                throw new VCashException(ErrorCode.AGENT_CANNOT_BE_FOUND);
+
+            var venues = _agentService.GetVenues(agent.CompanyId.Value);
+
+            if (!(venues?.Any() ?? false))
+                throw new VCashException(ErrorCode.VENUE_CANNOT_BE_FOUND);
+
+            var defaultVenueId = venues[0].VenueId;
+            var defaultCashier = _cashierService.Register(agent.AgentId.Value,
+                                                          defaultVenueId.Value,
+                                                          agent.UserName,
+                                                          agent.FirstName,
+                                                          agent.LastName,
+                                                          request.Pin);
+
+            return new _RegisterCashierResponse()
+            {
+                CashierId = defaultCashier.CashierId
+            };
+        }
+
+        [HttpGet("all")]
+        public _GetCashiersResponse GetCashiers()
+        {
+            var agentUserId = HttpContext.Current().Guardian.UserId;
+            var agent = _agentService.GetAgent(agentUserId);
+            if (agent == null)
+                throw new VCashException(ErrorCode.AGENT_CANNOT_BE_FOUND);
+
+            var cashiers = _cashierService.GetCashiers(agentId: agent.AgentId.Value);
+            var result = new _GetCashiersResponse()
+            {
+                Cashiers = Mapper.Map<List<_CashierDto>>(cashiers)
+            };
+            return result;
         }
     }
 }

@@ -6,6 +6,7 @@ namespace Victory.VCash.Api.Controllers.SalesApp
 {
     [ApiExplorerSettings(GroupName = ControllerGroupName.SALES_APP)]
     [Route($"{ControllerGroupName.SALES_APP}/[controller]")]
+    [Authorize(AuthenticationSchemes = AuthScheme.AZURE_AD)]
     public class BaseSalesAppController : BaseController
     {
     }

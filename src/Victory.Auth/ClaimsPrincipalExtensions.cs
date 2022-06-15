@@ -24,7 +24,7 @@ namespace Victory.Auth
         public static string GetUserName(this ClaimsPrincipal user)
         {
             //guardian claims
-            var userName = user.Claims.GetClaim("UserName");
+            var userName = user.Claims.GetClaim("user_name");
 
             //try azure ad claims
             if (string.IsNullOrEmpty(userName))
@@ -61,11 +61,20 @@ namespace Victory.Auth
 
         public static bool IsAzureAdClaims(this ClaimsPrincipal user)
         {
-            var userName = user.Claims.GetClaim("preferred_username");
-            if (string.IsNullOrEmpty(userName))
-                return false;
+            var issuer = user.Claims.GetClaim("iss");
+            if (!string.IsNullOrEmpty(issuer) && issuer.Contains("microsoft"))
+                return true;
 
-            return true;
+            return false;
+        }
+
+        public static bool IsGuardianClaims(this ClaimsPrincipal user)
+        {
+            var token = user.Claims.GetClaim("guardian_token");
+            if (!string.IsNullOrEmpty(token))
+                return true;
+
+            return false;
         }
     }
 }

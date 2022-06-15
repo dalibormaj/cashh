@@ -63,7 +63,7 @@ namespace Victory.Auth
         {
             var claims = new List<Claim>();
 
-            if (!string.IsNullOrEmpty(token)) claims.Add(new Claim("token", token));
+            if (!string.IsNullOrEmpty(token)) claims.Add(new Claim("guardian_token", token));
             if (!string.IsNullOrEmpty(validateTokenResponse.UserId)) claims.Add(new Claim("user_id", validateTokenResponse.UserId));
             if (!string.IsNullOrEmpty(validateTokenResponse.UserName)) claims.Add(new Claim("user_name", validateTokenResponse.UserName));
 

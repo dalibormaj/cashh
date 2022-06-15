@@ -8,6 +8,7 @@ using System.Security.Claims;
 using System.Text;
 using Victory.DataAccess;
 using Victory.VCash.Application.Services.AuthService.Results;
+using Victory.VCash.Domain.Enums;
 using Victory.VCash.Domain.Models;
 using Victory.VCash.Infrastructure.Errors;
 using Victory.VCash.Infrastructure.Repositories;
@@ -30,8 +31,15 @@ namespace Victory.VCash.Application.Services.AuthService
             _unitOfWork = unitOfWork;
         }
 
-        public Device RegisterDevice(string agentId, string deviceName)
+        public Device RegisterDevice(Guid agentId, string deviceName)
         {
+            var agent = _unitOfWork.GetRepository<AgentRepository>().GetAgent(agentId);
+            if (agent == null)
+                throw new VCashException(ErrorCode.AGENT_CANNOT_BE_FOUND);
+
+            if(agent.AgentStatusId != AgentStatus.ACTIVE)
+                throw new VCashException(ErrorCode.AGENT_IS_NOT_ACTIVE);
+
             //if all devices registered for selected agentId
             var devices = _unitOfWork.GetRepository<AuthRepository>().GetDevices(agentId);
 
@@ -73,17 +81,16 @@ namespace Victory.VCash.Application.Services.AuthService
             return device;
         }
 
-        public CreateDeviceTokenResult CreateDeviceToken(string agentId, string deviceCode)
+        public CreateDeviceTokenResult CreateDeviceToken(Guid agentId, string deviceCode)
         {
             var devices = _unitOfWork.GetRepository<AuthRepository>().GetDevices(agentId, deviceCode: deviceCode);
             if (!(devices?.Any()?? false))
                 throw new VCashException(ErrorCode.INVALID_DEVICE_CODE);
 
             if (devices?.Count() > 1)
-                throw new VCashException(ErrorCode.BAD_REQUEST);
+                throw new VCashException(ErrorCode.INVALID_DEVICE_CODE);
 
             var device = devices?.FirstOrDefault();
-
             if (device.DeviceCodeIssuedAt != null && device.DeviceCodeIssuedAt.Value.AddMinutes(device.DeviceCodeExpiresInMin.Value) > DateTime.UtcNow)
                 throw new VCashException(ErrorCode.DEVICE_CODE_HAS_EXPIRED);
 
@@ -91,6 +98,8 @@ namespace Victory.VCash.Application.Services.AuthService
             if (device?.Enabled ?? false)
             {
                 var agent = _unitOfWork.GetRepository<AgentRepository>().GetAgent(agentId);
+                if (agent == null)
+                    throw new VCashException(ErrorCode.AGENT_CANNOT_BE_FOUND);
 
                 var tokenIssuedAt = DateTime.UtcNow;
                 var tokenExpiresAt = DateTime.UtcNow.AddYears(_settings.DeviceToken.ExpiresInYears);
@@ -103,7 +112,7 @@ namespace Victory.VCash.Application.Services.AuthService
                 var claims = new[]
                     {
                         new Claim("device_id", device.DeviceId.ToString()),
-                        new Claim("agent_id", device.AgentId),
+                        new Claim("agent_id", device.AgentId.ToString()),
                         new Claim("agent_user_id", agent.UserId.ToString())
                     };
 
@@ -142,7 +151,7 @@ namespace Victory.VCash.Application.Services.AuthService
             var claims = new List<Claim>();
             int deviceId = default;
             string deviceName = string.Empty;
-            string agentId = string.Empty;
+            Guid? agentId = null;
             DateTime? issuedAt = null;
             DateTime? expiresAt = null;
 
@@ -165,7 +174,7 @@ namespace Victory.VCash.Application.Services.AuthService
                 }, out SecurityToken validatedToken);
 
                 claims = claimsPrincipal.Claims.ToList();
-                agentId = getClaim(claims, "agent_id");
+                agentId = new Guid(getClaim(claims, "agent_id"));
                 int.TryParse(getClaim(claims, "device_id"), out deviceId);
                 deviceName = getClaim(claims, "device_name");
 
@@ -174,7 +183,7 @@ namespace Victory.VCash.Application.Services.AuthService
 
                 var device = _unitOfWork.GetRepository<AuthRepository>().GetDevice(deviceId);
                 if (device == null)
-                    throw new VCashException(ErrorCode.DEVICE_DOES_NOT_EXIST);
+                    throw new VCashException(ErrorCode.DEVICE_CANNOT_BE_FOUND);
 
                 if (device.AgentId != agentId)
                     throw new VCashException(ErrorCode.INVALID_DEVICE_TOKEN);
@@ -190,13 +199,24 @@ namespace Victory.VCash.Application.Services.AuthService
                 if (!string.IsNullOrEmpty(exp))
                     expiresAt = DateTimeOffset.FromUnixTimeSeconds(Convert.ToInt32(exp)).DateTime;
 
+                var agent = _unitOfWork.GetRepository<AgentRepository>().GetAgent(agentId.Value);
+                var isAgentActive = agent?.AgentStatusId == AgentStatus.ACTIVE;
+
                 //fix values if someone manually changed in DB 
-                if (device.TokenIssuedAt != issuedAt || device.TokenExpiresAt != expiresAt)
+                if (device.TokenIssuedAt != issuedAt || device.TokenExpiresAt != expiresAt || !isAgentActive)
                 {
                     device.TokenIssuedAt = issuedAt;
                     device.TokenExpiresAt = expiresAt;
+
+                    //disable device if agent is not active
+                    if (!isAgentActive)
+                        device.Enabled = false;
+
                     device = _unitOfWork.GetRepository<AuthRepository>().SaveDevice(device);
                 }
+
+                if (!(device.Enabled ?? false))
+                    throw new VCashException(ErrorCode.DEVICE_NOT_AUTHORIZED);
             }
             catch (VCashException ex)
             {
@@ -235,10 +255,12 @@ namespace Victory.VCash.Application.Services.AuthService
             var deviceClaims = tokenHandler.ReadJwtToken(deviceToken)?.Claims?.ToList();
             var agentId = deviceClaims.SingleOrDefault(x => "agent_id".Equals(x.Type, StringComparison.OrdinalIgnoreCase))?.Value;
 
-            var cashier = _unitOfWork.GetRepository<CashierRepository>().GetCashier(parentAgentId: agentId, userName: userName);
-            if (cashier == null)
-                throw new VCashException(ErrorCode.CASHIER_DOES_NOT_EXIST);
+            //validate pin
+            var cashiers = _unitOfWork.GetRepository<CashierRepository>().GetCashiers(parentAgentId: new Guid(agentId), userName: userName);
+            if (cashiers == null || (cashiers?.Count() ?? 0) > 1)
+                throw new VCashException(ErrorCode.CASHIER_CANNOT_BE_FOUND);
 
+            var cashier = cashiers.First();
             var isPinValid = cashier.Pin == pin;
             if (!isPinValid)
                 throw new VCashException(ErrorCode.INVALID_CASHIER_CREDENTIALS);

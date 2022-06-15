@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.Net.Http.Headers;
+using System;
 using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Net.Http.Formatting;
@@ -31,7 +32,7 @@ namespace Victory.VCash.Api.Controllers.Auth
         [Route("code")]
         public CreateDeviceCodeResponse CreateDeviceCode([FromBody] CreateDeviceCodeRequest request)
         {
-            var device = _authService.RegisterDevice(request.AgentId, request.DeviceName);
+            var device = _authService.RegisterDevice(new Guid(request.AgentId), request.DeviceName);
             return new CreateDeviceCodeResponse()
             {
                 DeviceCode = device.DeviceCode,
@@ -43,7 +44,7 @@ namespace Victory.VCash.Api.Controllers.Auth
         [Route("token")]
         public CreateDeviceTokenResponse CreateDeviceToken([FromBody] CreateDeviceTokenRequest request)
         {
-            var result = _authService.CreateDeviceToken(request.AgentId, request.DeviceCode);
+            var result = _authService.CreateDeviceToken(new Guid(request.AgentId), request.DeviceCode);
             if (string.IsNullOrEmpty(result.DeviceToken))
                 throw new VCashException(ErrorCode.BAD_REQUEST);
 

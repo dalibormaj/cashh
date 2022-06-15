@@ -2,11 +2,9 @@
 
 namespace Victory.VCash.Api.Controllers.AgentApp.Dtos.Requests
 {
-    public class _RequestPasswordResetRequest
+    public class _OverridePasswordRequest
     {
         [Required]
-        public string UserIdentifier { get; set; }
-        [Required]
-        public string PasswordResetUrl { get; set; }
+        public string NewPassword { get; set; }
     }
 }

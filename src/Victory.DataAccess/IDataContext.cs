@@ -13,6 +13,7 @@ namespace Victory.DataAccess
         #region Sync Methods
         List<IDictionary<string, object>> ExecuteSql(string sql);
         List<T> ExecuteSql<T>(string sql);
+        IDataReader ExecuteReader(string sql);
         List<T> ExecuteSql<T>(string sql, IMapper mapper);
         int ExecuteProcedure(string storedProcedureName, object parameters = null);
         List<IDictionary<string, object>> ExecuteReaderProcedure(string storedProcedureName, object parameters = null);

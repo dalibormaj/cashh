@@ -11,8 +11,8 @@ namespace Victory.VCash.Application.Services.AuthService
 {
     public interface IAuthService
     {
-        Device RegisterDevice(string agentId, string deviceName);
-        CreateDeviceTokenResult CreateDeviceToken(string agentId, string deviceCode);
+        Device RegisterDevice(Guid agentId, string deviceName);
+        CreateDeviceTokenResult CreateDeviceToken(Guid agentId, string deviceCode);
         ValidateDeviceTokenResult ValidateDeviceToken(string token);
         CreateCashierTokenResult CreateCashierToken(string deviceToken, string userName, string pin);
     }

@@ -13,6 +13,7 @@ using Victory.VCash.Api.Controllers;
 using Victory.VCash.Api.Controllers.CashierApp;
 using Victory.VCash.Api.Controllers.CashierApp.Dtos.Requests;
 using Victory.VCash.Api.Mappers;
+using Victory.VCash.Application.Mappers;
 using Victory.VCash.Infrastructure.Common;
 
 namespace Victory.VCash.Api.Extensions
@@ -51,9 +52,14 @@ namespace Victory.VCash.Api.Extensions
         {
             var mapperConfig = new MapperConfiguration(mc =>
             {
+                //api profiles
+                mc.AddProfile<AgentMapperProfile>();
                 mc.AddProfile<AuthMapperProfile>();
                 mc.AddProfile<CashierMapperProfile>();
                 mc.AddProfile<SalesMapperProfile>();
+                
+                //application profiles
+                mc.AddProfile<ServiceMapperProfile>();
             });
 
             IMapper mapper = mapperConfig.CreateMapper();

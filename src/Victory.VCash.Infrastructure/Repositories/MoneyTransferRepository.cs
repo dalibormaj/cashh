@@ -75,6 +75,7 @@ namespace Victory.VCash.Infrastructure.Repositories
             var s_moneyTransferStatusId = ((int?)moneyTransfer.MoneyTransferStatusId)?.ToString() ?? "null";
             var s_createdBy = !string.IsNullOrEmpty(moneyTransfer.CreatedBy)? $"'{ moneyTransfer.CreatedBy }'" : "null";
             var s_modifiedBy = !string.IsNullOrEmpty(moneyTransfer.ModifiedBy) ? $"'{ moneyTransfer.ModifiedBy }'" : "null";
+            var unixMs = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
 
             var sql = $@"DO $$
                          DECLARE
@@ -108,7 +109,7 @@ namespace Victory.VCash.Infrastructure.Repositories
 	                         END IF;
 	 
 	                         -- create temp table with affected rows
-	                         CREATE TEMPORARY TABLE _tmp{nameof(MoneyTransfer)} ON COMMIT DROP 
+	                         CREATE TEMPORARY TABLE _tmp{unixMs} ON COMMIT DROP 
 	                         AS
 	                         SELECT * 
 	                         FROM money_transfer 
@@ -117,7 +118,7 @@ namespace Victory.VCash.Infrastructure.Repositories
                          
                          -- result
                          SELECT * 
-                         FROM _tmp{nameof(MoneyTransfer)}";
+                         FROM _tmp{unixMs}";
 
             var mapper = new MapperConfiguration(cfg =>
             {
@@ -152,6 +153,7 @@ namespace Victory.VCash.Infrastructure.Repositories
             string s_externalTransactionId = transaction?.ExternalTransactionId?.ToString() ?? "null";
             string s_externalTransactionTypeId = transaction?.ExternalTransactionTypeId?.ToString() ?? "null";
             string s_externalGroupIdentifier = transaction?.ExternalGroupIdentifier?.ToString() ?? "null";
+            var unixMs = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
 
             var sql = $@"DO $$
 						 DECLARE
@@ -180,7 +182,7 @@ namespace Victory.VCash.Infrastructure.Repositories
 							 END IF;
 
 							 -- create temp table with affected rows
-							 CREATE TEMPORARY TABLE _tmp{nameof(Transaction)} ON COMMIT DROP 
+							 CREATE TEMPORARY TABLE _tmp{unixMs} ON COMMIT DROP 
 							 AS
 							 SELECT * 
 							 FROM ""transaction"" 
@@ -189,7 +191,7 @@ namespace Victory.VCash.Infrastructure.Repositories
 
 						 -- result
 						 SELECT * 
-						 FROM _tmp{nameof(Transaction)}";
+						 FROM _tmp{unixMs}";
 
             var mapper = new MapperConfiguration(cfg =>
             {

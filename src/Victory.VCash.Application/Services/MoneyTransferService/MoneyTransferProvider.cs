@@ -38,22 +38,22 @@ namespace Victory.VCash.Application.Services.MoneyTransferService
                 throw new VCashException(ErrorCode.AMOUNT_MISSING_OR_ZERO);
 
             if (fromUser == null)
-                throw new VCashException(ErrorCode.USER_DOES_NOT_EXIST);
+                throw new VCashException(ErrorCode.PL_USER_CANNOT_BE_FOUND);
 
             if (fromUser.UserStatus?.Code != PL_UserStatus.ACT.ToString())
-                throw new VCashException(ErrorCode.USER_IS_NOT_ACTIVE);
+                throw new VCashException(ErrorCode.PL_USER_IS_NOT_ACTIVE, $"[user id: {fromUser.UserId}]");
 
             if (toUser == null)
-                throw new VCashException(ErrorCode.USER_DOES_NOT_EXIST);
+                throw new VCashException(ErrorCode.PL_USER_CANNOT_BE_FOUND);
 
             if (toUser.UserStatus?.Code != PL_UserStatus.ACT.ToString())
-                throw new VCashException(ErrorCode.USER_IS_NOT_ACTIVE);
+                throw new VCashException(ErrorCode.PL_USER_IS_NOT_ACTIVE, $"[user id: {toUser.UserId}]");
 
             if (string.IsNullOrEmpty(fromUser.UserType?.Code) || string.IsNullOrEmpty(toUser.UserType?.Code))
                 throw new VCashException(ErrorCode.BAD_REQUEST);
 
 
-            var isDeposit = "PLYON".Equals(toUser.UserType.Code, StringComparison.OrdinalIgnoreCase);
+            var isDeposit = PL_UserType.PLYON.ToString().Equals(toUser.UserType.Code, StringComparison.OrdinalIgnoreCase);
             var needApprovalAmount = isDeposit ? 5000 : 500;
           
             var maxDepositAmount = 60000000;

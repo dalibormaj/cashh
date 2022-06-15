@@ -1,11 +1,13 @@
 ﻿using Microsoft.IdentityModel.Tokens;
 using System;
+using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Security.Claims;
 using System.Text;
 using Victory.DataAccess;
 using Victory.VCash.Domain.Models;
+using Victory.VCash.Domain.Query;
 using Victory.VCash.Infrastructure.Errors;
 using Victory.VCash.Infrastructure.Repositories;
 
@@ -21,37 +23,54 @@ namespace Victory.VCash.Application.Services.CashierService
 
         public Cashier GetCashierByUserName(string userName)
         {
-            var cashier = _unitOfWork.GetRepository<CashierRepository>().GetCashier(userName: userName);
-            if (cashier == null)
-                throw new VCashException(ErrorCode.CASHIER_DOES_NOT_EXIST);
+            var cashiers = _unitOfWork.GetRepository<CashierRepository>().GetCashiers(userName: userName);
+            if(cashiers == null || (cashiers?.Count()?? 0) > 1)
+                throw new VCashException(ErrorCode.CASHIER_CANNOT_BE_FOUND);
 
-            return cashier;
+            return cashiers.FirstOrDefault();
         }
 
-        public Cashier Register(string parentAgentId, int venueId, string userName, string name, string lastName)
+        public Cashier Register(Guid parentAgentId, int venueId, string userName, string firstName, string lastName, string pin = null)
         {
             var agent = _unitOfWork.GetRepository<AgentRepository>().GetAgent(parentAgentId);
             if (agent == null)
-                throw new VCashException(ErrorCode.AGENT_DOES_NOT_EXIST);
+                throw new VCashException(ErrorCode.AGENT_CANNOT_BE_FOUND);
 
-            //TODO!!! ovde proveriti da li proslednjei shop pripada agentu
+            var venue = _unitOfWork.GetRepository<AgentRepository>().GetVenue(venueId);
+            if (venue == null)
+                throw new VCashException(ErrorCode.VENUE_CANNOT_BE_FOUND);
+
+            if (venue.CompanyId != agent.CompanyId)
+                throw new VCashException(ErrorCode.VENUE_DOES_NOT_BELONG_TO_THE_AGENT);
+
+            var isExist = _unitOfWork.GetRepository<CashierRepository>().GetCashiers(parentAgentId: agent.AgentId.Value, userName: userName)?.Any() ?? false;
+            if (isExist)
+                throw new VCashException(ErrorCode.CASHIER_ALREADY_REGISTERED);
+
+            //generate random pin if it's not selected
+            pin = string.IsNullOrEmpty(pin) ? new Random().Next(1000, 9999).ToString() : pin;
 
             var cashier = new Cashier()
             {
                 ParentAgentId = parentAgentId,
                 VenueId = venueId,
                 UserName = userName,
-                Name = name,
+                FirstName = firstName,
                 LastName = lastName,
-                Pin = new Random().Next(1000, 9999).ToString()
+                Pin = pin
             };
             cashier = _unitOfWork.GetRepository<CashierRepository>().SaveCashier(cashier);
             return cashier;
         }
 
-        public Cashier Deregister(string cashierId)
+        public Cashier Deregister(Guid cashierId)
         {
             throw new NotImplementedException();
+        }
+
+        public List<CashierWithDetails> GetCashiers(Guid agentId)
+        {
+            return _unitOfWork.GetRepository<CashierRepository>().GetAllCashiersWithDetails(agentId);
         }
     }
 }

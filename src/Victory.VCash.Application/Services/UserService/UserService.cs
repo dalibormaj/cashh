@@ -39,7 +39,7 @@ namespace Victory.VCash.Application.Services.UserService
         public async Task<GetUserOutput> GetUserAsync(string identifier, bool maskBasicValues = false)
         {
             if (string.IsNullOrEmpty(identifier))
-                throw new VCashException(ErrorCode.USER_DOES_NOT_EXIST);
+                throw new VCashException(ErrorCode.PL_USER_CANNOT_BE_FOUND);
 
             bool isIdentifierNumber = long.TryParse(identifier, out _);
             bool isPhoneNumber = identifier.StartsWith("+") || 
@@ -61,11 +61,11 @@ namespace Victory.VCash.Application.Services.UserService
             }
 
             if (userId == null)
-                throw new VCashException(ErrorCode.USER_DOES_NOT_EXIST);
+                throw new VCashException(ErrorCode.PL_USER_CANNOT_BE_FOUND);
 
             var user = await _internalApiClient.GetUserDetailsAsync(new GetUserDetailsRequest() { TpsUserId = userId.ToString() });
             if (user == null)
-                throw new VCashException(ErrorCode.USER_DOES_NOT_EXIST);
+                throw new VCashException(ErrorCode.PL_USER_CANNOT_BE_FOUND);
 
             var output = new GetUserOutput()
             {
@@ -80,7 +80,7 @@ namespace Victory.VCash.Application.Services.UserService
                                 .FirstOrDefault(x => "Blinking.CitizenId".Equals(x.PropertyName, StringComparison.OrdinalIgnoreCase))
                                 .PropertyValue,
                 StatusCode = user.UserStatus.Code,
-                BirthDate = user.UserDetail.BirthDate
+                BirthDate = user.UserDetail.BirthDate == default? null : user.UserDetail.BirthDate
             };
 
             if (maskBasicValues) 

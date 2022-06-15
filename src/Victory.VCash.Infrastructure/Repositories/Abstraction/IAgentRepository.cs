@@ -9,14 +9,18 @@ namespace Victory.VCash.Infrastructure.Repositories.Abstraction
 {
     public interface IAgentRepository
     {
-        Agent GetAgent(string agentId);
-        Agent GetAgent(string agentId = null, int? userId = null, string userName = null);
+        Agent GetAgent(Guid agentId);
+        List<Agent> GetAgents(Guid? agentId = null, int? userId = null, string userName = null, string email = null, int? companyId = null);
         Company GetCompany(int companyId);
-        Company GetCompany(string agentId);
+        List<Company> GetCompanies(int? companyId = null, string taxNumber = null);
         Venue GetVenue(int venueId);
-        List<Venue> GetVenues(int companyId);
+        List<Venue> GetVenues(int? companyId = null);
+        BankAccount GetBankAccount(int bankAccountId);
+        List<BankAccount> GetBankAccounts(int? bankAccountId = null, int? companyId = null);
+        
         Agent SaveAgent(Agent agent);
         Company SaveCompany(Company company);
         Venue SaveVenue(Venue venue);
+        BankAccount SaveBankAccount(BankAccount bankAccount);
     }
 }

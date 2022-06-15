@@ -8,10 +8,11 @@ namespace Victory.VCash.Domain.Enums
 {
     public enum AgentStatus : int
     {
-        PENDING_APPROVAL = 10,
-        ACTIVE = 20,
-        SUSPENDED = 30,
-        DELETED = 40,
+        DRAFT = 10,
+        PENDING_VERIFICATION = 20,
+        ACTIVE = 30,
+        BLOCKED = 40,
+        SUSPENDED = 50,
         ERROR = 100
     }
 }
