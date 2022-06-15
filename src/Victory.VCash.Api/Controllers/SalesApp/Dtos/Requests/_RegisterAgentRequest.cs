@@ -47,6 +47,10 @@ namespace Victory.VCash.Api.Controllers.SalesApp.Dtos.Requests
         public string City { get; set; }
         public string Municipality { get; set; }
         public string Address { get; set; }
+        public string GooglePlaceId { get; set; }
+        public string GoogleFullAddress { get; set; }
+        public decimal? Latitude { get; set; }
+        public decimal? Longitude { get; set; }
     }
 }
 
